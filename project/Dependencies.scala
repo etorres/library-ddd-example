@@ -18,12 +18,30 @@ trait Cats {
   val kittens = organization %% "kittens" % kittensVersion
 }
 
+trait Doobie {
+  private[this] val organization = "org.tpolecat"
+  private[this] val version = "1.0.0-RC2"
+
+  val doobieCore = organization %% "doobie-core" % version
+  val doobieFree = organization %% "doobie-free" % version
+  val doobieHikari = organization %% "doobie-hikari" % version
+  val doobiePostgres = organization %% "doobie-postgres" % version
+}
+
 trait Fs2 {
   private[this] val organization = "co.fs2"
   private[this] val version = "3.2.12"
 
   val fs2Core = organization %% "fs2-core" % version
   val fs2Io = organization %% "fs2-io" % version
+}
+
+trait Hikari {
+  private[this] val organization = "com.zaxxer"
+
+  private[this] val version = "5.0.1"
+
+  val hikariCP = organization % "HikariCP" % version
 }
 
 trait Log4cats {
@@ -74,7 +92,9 @@ trait Scopt {
 
 object Dependencies
     extends Cats
+    with Doobie
     with Fs2
+    with Hikari
     with Log4cats
     with Log4j
     with Munit

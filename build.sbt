@@ -10,13 +10,21 @@ lazy val `library-ddd-example` =
 
 lazy val catalogue = project
   .application("catalogue")
-  .dependsOn(commons % "test->test;compile->compile")
+  .dependsOn(
+    `book-model` % "test->test;compile->compile",
+    commons % "test->test;compile->compile",
+  )
   .mainDependencies(
     catsCore,
     catsEffect,
     catsEffectKernel,
     catsEffectStd,
+    doobieCore,
+    doobieFree,
+    doobieHikari,
+    doobiePostgres,
     fs2Core,
+    hikariCP,
     log4catsCore,
     log4catsSlf4j,
   )
@@ -30,13 +38,13 @@ lazy val catalogue = project
   )
   .settings(Compile / mainClass := fqClassNameFrom("CatalogueApplication"))
 
-lazy val commons =
-  project.library("commons").mainDependencies(catsCore).testDependencies(munit, scalacheck)
-
 lazy val lending =
   project
     .application("lending")
-    .dependsOn(commons % "test->test;compile->compile")
+    .dependsOn(
+      `book-model` % "test->test;compile->compile",
+      commons % "test->test;compile->compile",
+    )
     .mainDependencies(
       catsCore,
       catsEffect,
@@ -54,3 +62,13 @@ lazy val lending =
       scalacheckEffectMunit,
     )
     .settings(Compile / mainClass := fqClassNameFrom("LendingApplication"))
+
+lazy val `book-model` =
+  project
+    .library("book-model")
+    .dependsOn(commons % "test->test;compile->compile")
+    .mainDependencies(catsCore)
+    .testDependencies(munit, scalacheck)
+
+lazy val commons =
+  project.library("commons").mainDependencies(catsCore).testDependencies(munit, scalacheck)
