@@ -20,6 +20,7 @@ lazy val catalogue = project
     catsEffect,
     catsEffectKernel,
     catsEffectStd,
+    catsFree,
     doobieCore,
     doobieFree,
     doobieHikari,
