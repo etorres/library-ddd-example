@@ -14,10 +14,7 @@ object Title:
 
   extension (title: Title) def value: String = title
 
-  sealed abstract class TitleValidationError(
-      message: String,
-      cause: Option[Throwable] = Option.empty[Throwable],
-  ) extends DomainError(message, cause)
+  sealed abstract class TitleValidationError(message: String) extends DomainError(message)
 
   object TitleValidationError:
     case object TitleIsEmpty extends TitleValidationError("Title cannot be empty")

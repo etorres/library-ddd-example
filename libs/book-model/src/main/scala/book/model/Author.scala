@@ -14,10 +14,7 @@ object Author:
 
   extension (author: Author) def value: String = author
 
-  sealed abstract class AuthorValidationError(
-      message: String,
-      cause: Option[Throwable] = Option.empty[Throwable],
-  ) extends DomainError(message, cause)
+  sealed abstract class AuthorValidationError(message: String) extends DomainError(message)
 
   object AuthorValidationError:
     case object AuthorIsEmpty extends AuthorValidationError("Author cannot be empty")

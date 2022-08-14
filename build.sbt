@@ -6,13 +6,14 @@ sbtSettings
 lazy val `library-ddd-example` =
   project
     .root("library-ddd-example")
-    .aggregate(commons, catalogue, lending)
+    .aggregate(commons, `commons-jdbc`, catalogue, lending)
 
 lazy val catalogue = project
   .application("catalogue")
   .dependsOn(
     `book-model` % "test->test;compile->compile",
     commons % "test->test;compile->compile",
+    `commons-jdbc` % "test->test;compile->compile",
   )
   .mainDependencies(
     catsCore,
@@ -72,3 +73,28 @@ lazy val `book-model` =
 
 lazy val commons =
   project.library("commons").mainDependencies(catsCore).testDependencies(munit, scalacheck)
+
+lazy val `commons-jdbc` =
+  project
+    .library("commons-jdbc")
+    .mainDependencies(
+      catsCore,
+      catsEffect,
+      catsEffectKernel,
+      ciris,
+      cirisRefined,
+      doobieCore,
+      doobieFree,
+      doobieHikari,
+      doobiePostgres,
+      hikariCP,
+      refined,
+      refinedCats,
+    )
+    .testDependencies(
+      munit,
+      munitCatsEffect,
+      munitScalacheck,
+      scalacheckEffect,
+      scalacheckEffectMunit,
+    )

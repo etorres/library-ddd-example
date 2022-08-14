@@ -75,13 +75,16 @@ object Settings {
 
     def mainDependencies(dependencies: ModuleID*): Project = dependencies_(dependencies)
 
-    def testDependencies(dependencies: ModuleID*): Project =
-      dependencies_(dependencies.map(_ % Test))
+    def optionalDependencies(dependencies: ModuleID*): Project =
+      dependencies_(dependencies.map(_ % Optional))
 
     def providedDependencies(dependencies: ModuleID*): Project =
       dependencies_(dependencies.map(_ % Provided))
 
     def runtimeDependencies(dependencies: ModuleID*): Project =
       dependencies_(dependencies.map(_ % Runtime))
+
+    def testDependencies(dependencies: ModuleID*): Project =
+      dependencies_(dependencies.map(_ % Test))
   }
 }

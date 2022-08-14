@@ -14,10 +14,7 @@ object ISBN:
 
   extension (isbn: ISBN) def value: String = isbn
 
-  sealed abstract class ISBNValidationError(
-      message: String,
-      cause: Option[Throwable] = Option.empty[Throwable],
-  ) extends DomainError(message, cause)
+  sealed abstract class ISBNValidationError(message: String) extends DomainError(message)
 
   object ISBNValidationError:
     case object ISBNInvalidFormat extends ISBNValidationError("Invalid or unsupported ISBN format")
