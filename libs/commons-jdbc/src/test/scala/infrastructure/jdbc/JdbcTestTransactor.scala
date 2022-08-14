@@ -1,12 +1,13 @@
 package es.eriktorr.library
 package infrastructure.jdbc
 
+import refined.types.NonEmptyString
+
 import cats.effect.{IO, Resource}
 import cats.implicits.*
 import doobie.hikari.HikariTransactor
 import doobie.implicits.*
 import doobie.{Fragment, Transactor}
-import eu.timepit.refined.api.Refined
 
 import scala.concurrent.ExecutionContext
 
@@ -17,7 +18,7 @@ object JdbcTestTransactor:
   ): Resource[IO, HikariTransactor[IO]] = for
     transactor <- JdbcTransactor(
       JdbcTestConfig.jdbcConfig.copy(connectUrl =
-        Refined.unsafeApply(
+        NonEmptyString.unsafeFrom(
           s"${JdbcTestConfig.jdbcConfig.connectUrl.value}?currentSchema=$currentSchema",
         ),
       ),

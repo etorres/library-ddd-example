@@ -6,13 +6,13 @@ sbtSettings
 lazy val `library-ddd-example` =
   project
     .root("library-ddd-example")
-    .aggregate(commons, `commons-jdbc`, catalogue, lending)
+    .aggregate(`commons-jdbc`, `commons-lang`, catalogue, lending)
 
 lazy val catalogue = project
   .application("catalogue")
   .dependsOn(
     `book-model` % "test->test;compile->compile",
-    commons % "test->test;compile->compile",
+    `commons-lang` % "test->test;compile->compile",
     `commons-jdbc` % "test->test;compile->compile",
   )
   .mainDependencies(
@@ -45,7 +45,7 @@ lazy val lending =
     .application("lending")
     .dependsOn(
       `book-model` % "test->test;compile->compile",
-      commons % "test->test;compile->compile",
+      `commons-lang` % "test->test;compile->compile",
     )
     .mainDependencies(
       catsCore,
@@ -68,29 +68,24 @@ lazy val lending =
 lazy val `book-model` =
   project
     .library("book-model")
-    .dependsOn(commons % "test->test;compile->compile")
+    .dependsOn(`commons-lang` % "test->test;compile->compile")
     .mainDependencies(catsCore)
     .testDependencies(munit, scalacheck)
-
-lazy val commons =
-  project.library("commons").mainDependencies(catsCore).testDependencies(munit, scalacheck)
 
 lazy val `commons-jdbc` =
   project
     .library("commons-jdbc")
+    .dependsOn(`commons-lang` % "test->test;compile->compile")
     .mainDependencies(
       catsCore,
       catsEffect,
       catsEffectKernel,
       ciris,
-      cirisRefined,
       doobieCore,
       doobieFree,
       doobieHikari,
       doobiePostgres,
       hikariCP,
-      refined,
-      refinedCats,
     )
     .testDependencies(
       munit,
@@ -99,3 +94,6 @@ lazy val `commons-jdbc` =
       scalacheckEffect,
       scalacheckEffectMunit,
     )
+
+lazy val `commons-lang` =
+  project.library("commons-lang").mainDependencies(catsCore).testDependencies(munit, scalacheck)

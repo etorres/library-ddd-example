@@ -23,12 +23,11 @@ trait Ciris {
   private[this] val version = "2.3.3"
 
   val ciris = organization %% "ciris" % version
-  val cirisRefined = organization %% "ciris-refined" % version
 }
 
 trait Doobie {
   private[this] val organization = "org.tpolecat"
-  private[this] val version = "1.0.0-RC2"
+  private[this] val version = "1.0.0-RC1"
 
   val doobieCore = organization %% "doobie-core" % version
   val doobieFree = organization %% "doobie-free" % version
@@ -84,14 +83,6 @@ trait Munit {
   val scalacheckEffectMunit = typelevelOrg %% "scalacheck-effect-munit" % scalacheckEffectVersion
 }
 
-trait Refined {
-  private[this] val organization = "eu.timepit"
-  private[this] val version = "0.10.1"
-
-  val refined = organization %% "refined" % version
-  val refinedCats = organization %% "refined-cats" % version
-}
-
 trait ScalaCheck {
   private[this] val organization = "org.scalacheck"
   private[this] val version = "1.16.0"
@@ -115,6 +106,5 @@ object Dependencies
     with Log4cats
     with Log4j
     with Munit
-    with Refined
     with ScalaCheck
     with Scopt
