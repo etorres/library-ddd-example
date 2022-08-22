@@ -48,7 +48,7 @@ trait Hikari {
 
   private[this] val version = "5.0.1"
 
-  val hikariCP = organization % "HikariCP" % version
+  val hikariCP = (organization % "HikariCP" % version).exclude("org.slf4j", "slf4j-api")
 }
 
 trait Log4cats {
