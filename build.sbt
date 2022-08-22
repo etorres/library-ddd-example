@@ -96,4 +96,7 @@ lazy val `commons-jdbc` =
     )
 
 lazy val `commons-lang` =
-  project.library("commons-lang").mainDependencies(catsCore).testDependencies(munit, scalacheck)
+  project
+    .library("commons-lang")
+    .mainDependencies(catsCore, catsEffect)
+    .testDependencies(munit, scalacheck)
