@@ -18,9 +18,9 @@ final class JdbcCatalogueSuite extends JdbcTransactorsSuite:
     forAllF(testCaseGen) { case TestCase(book, bookInstance) =>
       val catalogue = JdbcCatalogue(transactorFixture())
       for
-        _ <- catalogue.add(book).assertEquals(())
-        _ <- catalogue.findBy(book.isbn).assertEquals(Some(book))
-        _ <- catalogue.add(bookInstance).assertEquals(())
+        _ <- catalogue.add(book).assertEquals((), "add new book")
+        _ <- catalogue.findBy(book.isbn).assertEquals(Some(book), "find a book by its ISBN")
+        _ <- catalogue.add(bookInstance).assertEquals((), "add new book instance")
       yield ()
     }
   }
