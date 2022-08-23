@@ -13,7 +13,10 @@ final class JdbcCatalogueSuite extends JdbcTransactorsSuite:
   test("should add a new book to the catalogue") {
     forAllF(bookGen) { book =>
       val catalogue = JdbcCatalogue(transactorFixture())
-      catalogue.add(book).assertEquals(())
+      for
+        _ <- catalogue.add(book).assertEquals(())
+        _ <- catalogue.findBy(book.isbn).assertEquals(Some(book))
+      yield ()
     }
   }
 

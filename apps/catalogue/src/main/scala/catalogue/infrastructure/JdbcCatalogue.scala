@@ -15,18 +15,22 @@ final class JdbcCatalogue(transactor: Transactor[IO])
     with TitleMapping
     with UUIDMapping:
   override def add(book: Book): IO[Unit] = IO.unit <* sql"""
-         INSERT INTO book_catalogue (isbn, title, author) 
-         VALUES (
-           ${book.isbn},
-           ${book.title},
-           ${book.author}
-         )""".update.run.transact(transactor)
+           INSERT INTO book_catalogue (isbn, title, author) 
+           VALUES (
+             ${book.isbn},
+             ${book.title},
+             ${book.author}
+           )""".update.run.transact(transactor)
 
   override def add(bookInstance: BookInstance): IO[Unit] = IO.unit <* sql"""
-         INSERT INTO book_instance_catalogue (book_id, isbn) 
-         VALUES (
-           ${bookInstance.bookId},
-           ${bookInstance.isbn}
-         )""".update.run.transact(transactor)
+           INSERT INTO book_instance_catalogue (book_id, isbn) 
+           VALUES (
+             ${bookInstance.bookId},
+             ${bookInstance.isbn}
+           )""".update.run.transact(transactor)
 
-  override def findBy(isbn: ISBN): IO[Option[Book]] = ???
+  override def findBy(isbn: ISBN): IO[Option[Book]] = sql"""
+           SELECT isbn, title, author 
+           FROM book_catalogue 
+           WHERE
+             isbn = $isbn""".query[Book].option.transact(transactor)
