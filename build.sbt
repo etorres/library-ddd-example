@@ -77,14 +77,11 @@ lazy val `commons-jdbc` =
     .library("commons-jdbc")
     .dependsOn(`commons-lang` % "test->test;compile->compile")
     .mainDependencies(
-      catsCore,
       catsEffect,
       catsEffectKernel,
       ciris,
       doobieCore,
-      doobieFree,
       doobieHikari,
-      doobiePostgres,
       hikariCP,
     )
     .testDependencies(
