@@ -16,13 +16,13 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
       LOOP
         EXECUTE 'CREATE SCHEMA IF NOT EXISTS ' || quote_ident(schema_name);
         EXECUTE 'CREATE TABLE IF NOT EXISTS ' || quote_ident(schema_name) || '.book_catalogue (
-          isbn VARCHAR(10) NOT NULL PRIMARY KEY,
+          isbn VARCHAR(10) PRIMARY KEY,
           title VARCHAR(255) NOT NULL,
           author VARCHAR(127) NOT NULL
         )';
         EXECUTE 'CREATE TABLE IF NOT EXISTS ' || quote_ident(schema_name) || '.book_instance_catalogue (
-          book_id UUID NOT NULL PRIMARY KEY,
-          isbn VARCHAR(10) NOT NULL
+          book_id UUID PRIMARY KEY,
+          isbn VARCHAR(10) REFERENCES ' || quote_ident(schema_name) || '.book_catalogue ON DELETE RESTRICT
         )';
       END LOOP;
     END\$\$;

@@ -23,7 +23,7 @@ object BookGenerators:
     author <- textGen().map(Author.unsafeFrom)
   yield Book(isbn, title, author)
 
-  val bookInstanceGen: Gen[BookInstance] = for
+  def bookInstanceGen(isbnGen: Gen[ISBN] = isbnGen): Gen[BookInstance] = for
     uuid <- uuidGen
     isbn <- isbnGen
     bookType <- Gen.oneOf(BookType.values.toList)

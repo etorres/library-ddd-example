@@ -39,7 +39,7 @@ object JdbcTestTransactor:
             WHERE table_schema = $currentSchema
             ORDER BY table_name""".query[String].to[List]
         _ <- tableNames
-          .map(tableName => Fragment.const(s"truncate table $tableName"))
+          .map(tableName => Fragment.const(s"TRUNCATE TABLE $tableName CASCADE"))
           .traverse_(_.update.run)
       yield ()).transact(transactor)
     }(_ => IO.unit)
