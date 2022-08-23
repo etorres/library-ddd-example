@@ -12,7 +12,7 @@ object ISBN:
   def unsafeFrom(value: String): ISBN = value
 
   def from(value: String): AllErrorsOr[ISBN] =
-    if raw"\\d{9}[\\d|X]".r.matches(value) then value.validNec else ISBNInvalidFormat.invalidNec
+    if raw"\d{9}[\d|X]".r.matches(value) then value.validNec else ISBNInvalidFormat.invalidNec
 
   extension (isbn: ISBN) def value: String = isbn
 
