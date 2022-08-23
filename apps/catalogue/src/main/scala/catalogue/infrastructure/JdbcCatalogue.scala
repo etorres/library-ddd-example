@@ -12,7 +12,8 @@ final class JdbcCatalogue(transactor: Transactor[IO])
     extends Catalogue
     with AuthorMapping
     with ISBNMapping
-    with TitleMapping:
+    with TitleMapping
+    with UUIDMapping:
   override def add(book: Book): IO[Unit] = IO.unit <* sql"""
          INSERT INTO book_catalogue (isbn, title, author) 
          VALUES (
@@ -21,6 +22,11 @@ final class JdbcCatalogue(transactor: Transactor[IO])
            ${book.author}
          )""".update.run.transact(transactor)
 
-  override def add(bookInstance: BookInstance): IO[Unit] = ???
+  override def add(bookInstance: BookInstance): IO[Unit] = IO.unit <* sql"""
+         INSERT INTO book_instance_catalogue (book_id, isbn) 
+         VALUES (
+           ${bookInstance.bookId},
+           ${bookInstance.isbn}
+         )""".update.run.transact(transactor)
 
   override def findBy(isbn: ISBN): IO[Option[Book]] = ???

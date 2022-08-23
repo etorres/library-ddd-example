@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package catalogue.integration
 
-import book.model.infrastructure.BookGenerators.bookGen
+import book.model.infrastructure.BookGenerators.{bookGen, bookInstanceGen}
 import catalogue.infrastructure.JdbcCatalogue
 import infrastructure.jdbc.JdbcTransactorsSuite
 
@@ -18,5 +18,8 @@ final class JdbcCatalogueSuite extends JdbcTransactorsSuite:
   }
 
   test("should add a new book instance to catalogue") {
-    ???
+    forAllF(bookInstanceGen) { bookInstance =>
+      val catalogue = JdbcCatalogue(transactorFixture())
+      catalogue.add(bookInstance).assertEquals(())
+    }
   }

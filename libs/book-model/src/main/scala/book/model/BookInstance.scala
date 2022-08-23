@@ -1,4 +1,6 @@
 package es.eriktorr.library
 package book.model
 
-final case class BookInstance(isbn: ISBN, bookId: BookId, bookType: BookType)
+import refined.types.UUID
+
+final case class BookInstance(bookId: UUID, isbn: ISBN, bookType: BookType)

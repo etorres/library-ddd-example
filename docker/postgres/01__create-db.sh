@@ -20,6 +20,10 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
           title VARCHAR(255) NOT NULL,
           author VARCHAR(127) NOT NULL
         )';
+        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || quote_ident(schema_name) || '.book_instance_catalogue (
+          book_id UUID NOT NULL PRIMARY KEY,
+          isbn VARCHAR(10) NOT NULL
+        )';
       END LOOP;
     END\$\$;
 EOSQL

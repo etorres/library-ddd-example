@@ -1,7 +1,8 @@
 package es.eriktorr.library
 package book.model.infrastructure
 
-import book.model.{Author, Book, ISBN, Title}
+import book.model.*
+import refined.types.infrastructure.RefinedTypesGenerators.uuidGen
 
 import org.scalacheck.Gen
 
@@ -21,3 +22,9 @@ object BookGenerators:
     title <- textGen().map(Title.unsafeFrom)
     author <- textGen().map(Author.unsafeFrom)
   yield Book(isbn, title, author)
+
+  val bookInstanceGen: Gen[BookInstance] = for
+    uuid <- uuidGen
+    isbn <- isbnGen
+    bookType <- Gen.oneOf(BookType.values.toList)
+  yield BookInstance(uuid, isbn, bookType)

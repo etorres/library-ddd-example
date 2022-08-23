@@ -17,7 +17,11 @@ object UUID:
       value.validNec
     else UUIDInvalidFormat.invalidNec
 
-  extension (uuid: UUID) def value: String = uuid
+  def fromJava(value: java.util.UUID): UUID = unsafeFrom(value.toString)
+
+  extension (uuid: UUID)
+    def value: String = uuid
+    def asJava: java.util.UUID = java.util.UUID.fromString(uuid.value).nn
 
   given Show[UUID] = Show.show(_.value)
 
