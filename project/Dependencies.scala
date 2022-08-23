@@ -1,5 +1,12 @@
 import sbt._
 
+trait Avro {
+  private[this] val organization = "org.apache.avro"
+  private[this] val version = "1.11.1"
+
+  val avro = organization % "avro" % version
+}
+
 trait Cats {
   private[this] val organization = "org.typelevel"
 
@@ -41,6 +48,14 @@ trait Fs2 {
 
   val fs2Core = organization %% "fs2-core" % version
   val fs2Io = organization %% "fs2-io" % version
+}
+
+trait Fs2Kafka {
+  private[this] val organization = "com.github.fd4s"
+  private[this] val version = "2.5.0"
+
+  val fs2Kafka = organization %% "fs2-kafka" % version
+  val fs2KafkaVulcan = organization %% "fs2-kafka-vulcan" % version
 }
 
 trait Hikari {
@@ -90,6 +105,13 @@ trait ScalaCheck {
   val scalacheck = organization %% "scalacheck" % version
 }
 
+trait SchemaRegistry {
+  private[this] val organization = "io.confluent"
+  private[this] val version = "7.2.1"
+
+  val schemaRegistryClient = organization % "kafka-schema-registry-client" % version
+}
+
 trait Scopt {
   private[this] val organization = "com.github.scopt"
   private[this] val version = "4.1.0"
@@ -97,14 +119,26 @@ trait Scopt {
   val scopt = organization %% "scopt" % version
 }
 
+trait Vulcan {
+  private[this] val organization = "com.github.fd4s"
+
+  private[this] val version = "1.8.3"
+
+  val vulcan = organization %% "vulcan" % version
+}
+
 object Dependencies
-    extends Cats
+    extends Avro
+    with Cats
     with Ciris
     with Doobie
     with Fs2
+    with Fs2Kafka
     with Hikari
     with Log4cats
     with Log4j
     with Munit
     with ScalaCheck
+    with SchemaRegistry
     with Scopt
+    with Vulcan

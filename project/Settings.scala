@@ -33,6 +33,7 @@ object Settings {
 
   private[this] def commonSettings(projectName: String): Def.SettingsDefinition = Seq(
     name := projectName,
+    resolvers += "Confluent" at "https://packages.confluent.io/maven/",
     ThisBuild / organization := orgPackage,
     ThisBuild / version := "1.0.0",
     ThisBuild / idePackagePrefix := Some(basePackage),
