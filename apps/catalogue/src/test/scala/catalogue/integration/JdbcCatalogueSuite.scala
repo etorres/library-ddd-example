@@ -1,24 +1,22 @@
 package es.eriktorr.library
 package catalogue.integration
 
-import book.model.Book
+import book.model.BookGenerators.bookGen
 import catalogue.infrastructure.JdbcCatalogue
 import infrastructure.jdbc.JdbcTransactorsSuite
-import validated.ValidatedIO.validatedNecIO
+
+import org.scalacheck.effect.PropF.forAllF
 
 final class JdbcCatalogueSuite extends JdbcTransactorsSuite:
-  override def currentSchema: String = "test_catalogue_book"
+  override def currentSchema: String = "test_book_catalogue"
 
   test("should add a new book to the catalogue") {
-    for
-      book <- Book
-        .from(
-          isbn = "0321125215",
-          title = "Domain-Driven Design: Tackling Complexity in the Heart of Software",
-          author = "Eric Evans",
-        )
-        .validated
-      catalogue = JdbcCatalogue(transactorFixture())
-      _ <- catalogue.add(book).assertEquals(())
-    yield ()
+    forAllF(bookGen) { book =>
+      val catalogue = JdbcCatalogue(transactorFixture())
+      catalogue.add(book).assertEquals(())
+    }
+  }
+
+  test("should add a new book instance to catalogue") {
+    ???
   }

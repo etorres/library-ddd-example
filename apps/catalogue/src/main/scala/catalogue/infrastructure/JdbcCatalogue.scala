@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package catalogue.infrastructure
 
-import book.model.{Book, BookInstance}
+import book.model.{Book, BookInstance, ISBN}
 import catalogue.model.Catalogue
 
 import cats.effect.IO
@@ -14,7 +14,7 @@ final class JdbcCatalogue(transactor: Transactor[IO])
     with ISBNMapping
     with TitleMapping:
   override def add(book: Book): IO[Unit] = IO.unit <* sql"""
-         INSERT INTO catalogue_book (isbn, title, author) 
+         INSERT INTO book_catalogue (isbn, title, author) 
          VALUES (
            ${book.isbn},
            ${book.title},
@@ -22,3 +22,5 @@ final class JdbcCatalogue(transactor: Transactor[IO])
          )""".update.run.transact(transactor)
 
   override def add(bookInstance: BookInstance): IO[Unit] = ???
+
+  override def findBy(isbn: ISBN): IO[Option[Book]] = ???
