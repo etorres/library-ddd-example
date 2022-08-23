@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package catalogue.integration
 
-import book.model.BookGenerators.bookGen
+import book.model.infrastructure.BookGenerators.bookGen
 import catalogue.infrastructure.JdbcCatalogue
 import infrastructure.jdbc.JdbcTransactorsSuite
 

@@ -1,24 +1,26 @@
 package es.eriktorr.library
 package refined.types
 
-import refined.types.NonEmptyString.AuthorValidationError.StringIsEmpty
+import refined.types.NonEmptyString.NonEmptyStringValidationError.StringIsEmpty
+import validated.AllErrorsOr
 
 import cats.Show
+import cats.syntax.all.*
 
 opaque type NonEmptyString = String
 
 object NonEmptyString:
   def unsafeFrom(value: String): NonEmptyString = value
 
-  def from(value: String): Either[NonEmptyStringValidationError, NonEmptyString] = if value.nonEmpty then
-    Right(unsafeFrom(value))
-  else Left(StringIsEmpty)
+  def from(value: String): AllErrorsOr[NonEmptyString] =
+    if value.nonEmpty then value.validNec else StringIsEmpty.invalidNec
 
   extension (nonEmptyString: NonEmptyString) def value: String = nonEmptyString
 
   given Show[NonEmptyString] = Show.show(_.value)
 
-  sealed abstract class NonEmptyStringValidationError(message: String) extends DomainError(message)
+  sealed abstract class NonEmptyStringValidationError(message: String)
+      extends ValidationError(message)
 
-  object AuthorValidationError:
-    case object StringIsEmpty extends NonEmptyStringValidationError("Author cannot be empty")
+  object NonEmptyStringValidationError:
+    case object StringIsEmpty extends NonEmptyStringValidationError("Value cannot be empty")

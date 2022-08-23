@@ -1,5 +1,7 @@
 package es.eriktorr.library
-package book.model
+package book.model.infrastructure
+
+import book.model.{Author, Book, ISBN, Title}
 
 import org.scalacheck.Gen
 

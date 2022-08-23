@@ -99,4 +99,10 @@ lazy val `commons-lang` =
   project
     .library("commons-lang")
     .mainDependencies(catsCore, catsEffect)
-    .testDependencies(munit, scalacheck)
+    .testDependencies(
+      munit,
+      munitCatsEffect,
+      munitScalacheck,
+      scalacheckEffect,
+      scalacheckEffectMunit,
+    )
