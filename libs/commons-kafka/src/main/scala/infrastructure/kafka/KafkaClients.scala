@@ -13,32 +13,35 @@ import fs2.kafka.vulcan.{
 }
 
 object KafkaClients:
+  type KafkaConsumerIO[A] = KafkaConsumer[IO, String, A]
+  type KafkaProducerIO[A] = KafkaProducer[IO, String, A]
+
   def defaultKafkaClients[A](using
       coderDecoder: Codec[A],
-  ): Resource[IO, (KafkaConsumer[IO, String, A], KafkaProducer.Metrics[IO, String, A])] =
+  ): Resource[IO, (KafkaConsumerIO[A], KafkaProducerIO[A])] =
     val kafkaConfig = KafkaConfig.default
     Resource
-      .eval[IO, KafkaIOClients[A]] {
+      .eval[IO, (Resource[IO, KafkaConsumerIO[A]], Resource[IO, KafkaProducerIO[A]])] {
         avroSettingsFrom[A](kafkaConfig).map { avroSettings =>
           val consumer = consumerFrom[A](kafkaConfig, avroSettings)
           val producer = producerFrom[A](kafkaConfig, avroSettings)
-          KafkaIOClients[A](consumer, producer)
+          consumer -> producer
         }
       }
-      .flatMap { clients =>
-        (clients.consumer, clients.producer).tupled
+      .flatMap { (consumer, producer) =>
+        (consumer, producer).tupled
       }
 
   def kafkaConsumerUsing[A](
       kafkaConfig: KafkaConfig,
-  )(using coderDecoder: Codec[A]): Resource[IO, KafkaConsumer[IO, String, A]] =
+  )(using coderDecoder: Codec[A]): Resource[IO, KafkaConsumerIO[A]] =
     Resource
       .eval[IO, AvroSettings[IO]](avroSettingsFrom(kafkaConfig))
       .flatMap(consumerFrom(kafkaConfig, _))
 
   def kafkaProducerUsing[A](
       kafkaConfig: KafkaConfig,
-  )(using coderDecoder: Codec[A]): Resource[IO, KafkaProducer[IO, String, A]] =
+  )(using coderDecoder: Codec[A]): Resource[IO, KafkaProducerIO[A]] =
     Resource
       .eval[IO, AvroSettings[IO]](avroSettingsFrom(kafkaConfig))
       .flatMap(producerFrom(kafkaConfig, _))
@@ -71,7 +74,7 @@ object KafkaClients:
   private[this] def consumerFrom[A](
       kafkaConfig: KafkaConfig,
       avroSettings: AvroSettings[IO],
-  )(using coderDecoder: Codec[A]): Resource[IO, KafkaConsumer[IO, String, A]] =
+  )(using coderDecoder: Codec[A]): Resource[IO, KafkaConsumerIO[A]] =
     implicit val eventDeserializer: RecordDeserializer[IO, A] =
       avroDeserializer[A].using(avroSettings)
 
@@ -87,7 +90,7 @@ object KafkaClients:
   private[this] def producerFrom[A](
       kafkaConfig: KafkaConfig,
       avroSettings: AvroSettings[IO],
-  )(using coderDecoder: Codec[A]) =
+  )(using coderDecoder: Codec[A]): Resource[IO, KafkaProducerIO[A]] =
     implicit val eventSerializer: RecordSerializer[IO, A] =
       avroSerializer[A].using(avroSettings)
 
@@ -95,8 +98,3 @@ object KafkaClients:
       .withBootstrapServers(kafkaConfig.bootstrapServersAsString)
 
     KafkaProducer.resource(producerSettings)
-
-  final private[this] case class KafkaIOClients[A](
-      consumer: Resource[IO, KafkaConsumer[IO, String, A]],
-      producer: Resource[IO, KafkaProducer.Metrics[IO, String, A]],
-  )
