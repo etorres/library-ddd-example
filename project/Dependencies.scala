@@ -56,6 +56,7 @@ trait Fs2Kafka {
 
   val fs2Kafka = organization %% "fs2-kafka" % version
   val fs2KafkaVulcan = organization %% "fs2-kafka-vulcan" % version
+  val fs2kafkaVulcanTestkitMunit = organization %% "fs2-kafka-vulcan-testkit-munit" % version
 }
 
 trait Hikari {

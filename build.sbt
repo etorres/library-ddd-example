@@ -58,6 +58,7 @@ lazy val lending =
     )
     .runtimeDependencies(log4jApi, log4jCore, log4jSlf4jImpl)
     .testDependencies(
+      fs2kafkaVulcanTestkitMunit,
       munit,
       munitCatsEffect,
       munitScalacheck,
