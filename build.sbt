@@ -49,12 +49,15 @@ lazy val lending =
       `commons-kafka` % "test->test;compile->compile",
     )
     .mainDependencies(
+      avro,
       catsCore,
       catsEffect,
       catsEffectKernel,
+      catsFree,
       fs2Core,
       log4catsCore,
       log4catsSlf4j,
+      vulcan,
     )
     .runtimeDependencies(log4jApi, log4jCore, log4jSlf4jImpl)
     .testDependencies(
@@ -96,7 +99,16 @@ lazy val `commons-jdbc` =
 
 lazy val `commons-kafka` = project
   .library("commons-kafka")
-  .mainDependencies(catsCore, catsEffect, fs2Kafka, fs2KafkaVulcan, vulcan)
+  .mainDependencies(
+    avro,
+    catsCore,
+    catsEffect,
+    catsEffectKernel,
+    fs2Kafka,
+    fs2KafkaVulcan,
+    schemaRegistryClient,
+    vulcan,
+  )
   .testDependencies(
     munit,
     munitCatsEffect,
