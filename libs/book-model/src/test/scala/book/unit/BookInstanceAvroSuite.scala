@@ -1,9 +1,10 @@
 package es.eriktorr.library
-package book.integration
+package book.unit
 
-import book.infrastructure.{AvroRoundTripSuite, BookInstanceAvroCodec}
+import book.infrastructure.BookGenerators.bookInstanceGen
+import book.infrastructure.BookInstanceAvroCodec
 import book.model.BookInstance
-import es.eriktorr.library.book.infrastructure.BookGenerators.bookInstanceGen
+import infrastructure.AvroRoundTripSuite
 
 import munit.ScalaCheckSuite
 

@@ -1,9 +1,9 @@
 package es.eriktorr.library
-package book.infrastructure
+package infrastructure
 
 import munit.ScalaCheckSuite
-import org.scalacheck.{Gen, Prop}
 import org.scalacheck.Prop.forAll
+import org.scalacheck.{Gen, Prop}
 import vulcan.Codec
 
 object AvroRoundTripSuite extends ScalaCheckSuite:

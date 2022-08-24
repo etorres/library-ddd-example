@@ -6,15 +6,7 @@ sbtSettings
 lazy val `library-ddd-example` =
   project
     .root("library-ddd-example")
-    .aggregate(
-      `book-avro`,
-      `book-model`,
-      `commons-jdbc`,
-      `commons-kafka`,
-      `commons-lang`,
-      catalogue,
-      lending,
-    )
+    .aggregate(`book-model`, `commons-jdbc`, `commons-kafka`, `commons-lang`, catalogue, lending)
 
 lazy val catalogue = project
   .application("catalogue")
@@ -52,7 +44,6 @@ lazy val lending =
   project
     .application("lending")
     .dependsOn(
-      `book-avro` % "test->test;compile->compile",
       `book-model` % "test->test;compile->compile",
       `commons-kafka` % "test->test;compile->compile",
       `commons-lang` % "test->test;compile->compile",
@@ -79,21 +70,11 @@ lazy val lending =
     )
     .settings(Compile / mainClass := fqClassNameFrom("LendingApplication"))
 
-lazy val `book-avro` =
-  project
-    .library("book-avro")
-    .dependsOn(
-      `book-model` % "test->test;compile->compile",
-      `commons-lang` % "test->test;compile->compile",
-    )
-    .mainDependencies(avro, catsCore, catsFree, vulcan)
-    .testDependencies(munit, scalacheck)
-
 lazy val `book-model` =
   project
     .library("book-model")
     .dependsOn(`commons-lang` % "test->test;compile->compile")
-    .mainDependencies(catsCore, catsKernel)
+    .mainDependencies(catsCore, catsKernel, catsFree)
     .optionalDependencies(avro, vulcan)
     .testDependencies(munit, scalacheck)
 
@@ -140,7 +121,8 @@ lazy val `commons-kafka` = project
 lazy val `commons-lang` =
   project
     .library("commons-lang")
-    .mainDependencies(catsCore, catsEffect)
+    .mainDependencies(catsCore, catsEffect, catsFree)
+    .optionalDependencies(avro, vulcan)
     .testDependencies(
       munit,
       munitCatsEffect,
