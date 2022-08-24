@@ -1,5 +1,5 @@
 package es.eriktorr.library
-package book.model.infrastructure
+package book.infrastructure
 
 import book.model.*
 import refined.types.infrastructure.RefinedTypesGenerators.uuidGen

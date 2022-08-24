@@ -1,5 +1,4 @@
 package es.eriktorr.library
-package lending.infrastructure
 
-object AvroNamespaces:
+object Namespaces:
   val default: String = "es.eriktorr.library"

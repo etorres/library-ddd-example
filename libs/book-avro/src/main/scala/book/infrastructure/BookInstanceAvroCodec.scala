@@ -1,16 +1,16 @@
 package es.eriktorr.library
-package lending.infrastructure
+package book.infrastructure
 
 import book.model.BookInstance
 
-import cats.syntax.all.*
+import cats.syntax.apply.*
 import vulcan.Codec
 
 trait BookInstanceAvroCodec extends BookTypeAvroCodec with ISBNAvroCodec with UUIDAvroCodec:
   implicit val bookInstanceAvroCodec: Codec[BookInstance] =
     Codec.record(
       name = "BookInstance",
-      namespace = AvroNamespaces.default,
+      namespace = Namespaces.default,
       doc = Some("A book instance"),
     ) { field =>
       (

@@ -1,10 +1,9 @@
 package es.eriktorr.library
-package lending.infrastructure
+package book.infrastructure
 
 import book.model.BookType
-import book.model.BookType.{Circulating, Restricted}
 
-import cats.syntax.all.*
+import cats.syntax.either.*
 import vulcan.{AvroError, Codec}
 
 import scala.util.Try
@@ -12,7 +11,7 @@ import scala.util.Try
 trait BookTypeAvroCodec:
   implicit val bookTypeAvroCodec: Codec[BookType] = Codec.enumeration[BookType](
     name = "BookType",
-    namespace = AvroNamespaces.default,
+    namespace = Namespaces.default,
     doc = Some("All possible states of a book instance"),
     symbols = BookType.values.toList.map(_.toString),
     encode = (bookType: BookType) => bookType.toString,

@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package lending.infrastructure
 
-import book.model.infrastructure.BookGenerators.bookInstanceGen
+import es.eriktorr.library.book.infrastructure.BookGenerators.bookInstanceGen
 import lending.model.BookInstanceAddedToCatalogue
 import refined.types.infrastructure.RefinedTypesGenerators.uuidGen
 

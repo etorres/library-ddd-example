@@ -1,5 +1,5 @@
 package es.eriktorr.library
-package lending.infrastructure
+package book.infrastructure
 
 import refined.types.UUID
 
