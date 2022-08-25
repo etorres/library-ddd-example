@@ -38,7 +38,7 @@ object LendingParameters:
       help("help").text("prints this usage text"),
     )
 
-  def parametersFrom(args: List[String]): Option[LendingParameters] =
+  def from(args: List[String]): Option[LendingParameters] =
     OParser.parse(argParser, args, LendingParameters(UUID.nil))
 
   def usage: String = OParser.usage(argParser)

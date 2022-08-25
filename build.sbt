@@ -47,6 +47,7 @@ lazy val lending =
     .application("lending")
     .dependsOn(
       `book-model` % "test->test;compile->compile",
+      `commons-jdbc` % "test->test;compile->compile",
       `commons-kafka` % "test->test;compile->compile",
       `commons-lang` % "test->test;compile->compile",
     )
