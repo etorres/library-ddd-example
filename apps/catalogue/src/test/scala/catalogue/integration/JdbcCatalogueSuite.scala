@@ -5,7 +5,7 @@ import book.infrastructure.BookGenerators.{bookGen, bookInstanceGen}
 import book.model.{Book, BookInstance}
 import catalogue.infrastructure.JdbcCatalogue
 import catalogue.integration.JdbcCatalogueSuite.{testCaseGen, TestCase}
-import infrastructure.jdbc.JdbcTransactorsSuite
+import shared.infrastructure.JdbcTransactorsSuite
 
 import cats.effect.IO
 import org.scalacheck.Gen

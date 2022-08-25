@@ -1,5 +1,5 @@
 package es.eriktorr.library
-package infrastructure.jdbc
+package shared.infrastructure
 
 import cats.effect.{IO, Resource}
 import doobie.hikari.HikariTransactor

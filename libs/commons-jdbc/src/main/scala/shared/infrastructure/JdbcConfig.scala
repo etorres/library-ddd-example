@@ -1,5 +1,5 @@
 package es.eriktorr.library
-package infrastructure.jdbc
+package shared.infrastructure
 
 import shared.refined.types.NonEmptyString
 
