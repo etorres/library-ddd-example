@@ -75,7 +75,7 @@ lazy val `book-model` =
     .library("book-model")
     .dependsOn(`commons-lang` % "test->test;compile->compile")
     .mainDependencies(catsCore, catsKernel)
-    .optionalDependencies(avro, catsFree, vulcan)
+    .optionalDependencies(avro, catsFree, doobieCore, vulcan)
     .testDependencies(log4jApi, log4jCore, log4jSlf4jImpl, munit, scalacheck)
 
 lazy val `commons-jdbc` =
@@ -122,7 +122,7 @@ lazy val `commons-lang` =
   project
     .library("commons-lang")
     .mainDependencies(catsCore, catsEffect)
-    .optionalDependencies(avro, catsFree, vulcan)
+    .optionalDependencies(avro, catsFree, doobieCore, doobiePostgres, vulcan)
     .testDependencies(
       munit,
       munitCatsEffect,

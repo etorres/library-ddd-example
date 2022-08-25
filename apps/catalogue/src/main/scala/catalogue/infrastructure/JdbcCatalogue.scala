@@ -1,8 +1,10 @@
 package es.eriktorr.library
 package catalogue.infrastructure
 
+import book.infrastructure.{AuthorJdbcMapping, ISBNJdbcMapping, TitleJdbcMapping}
 import book.model.{Book, BookInstance, ISBN}
 import catalogue.model.Catalogue
+import shared.refined.types.infrastructure.UUIDJdbcMapping
 
 import cats.effect.IO
 import doobie.Transactor
@@ -10,10 +12,10 @@ import doobie.implicits.*
 
 final class JdbcCatalogue(transactor: Transactor[IO])
     extends Catalogue
-    with AuthorMapping
-    with ISBNMapping
-    with TitleMapping
-    with UUIDMapping:
+    with AuthorJdbcMapping
+    with ISBNJdbcMapping
+    with TitleJdbcMapping
+    with UUIDJdbcMapping:
   override def add(book: Book): IO[Unit] = IO.unit <* sql"""
            INSERT INTO book_catalogue (isbn, title, author) 
            VALUES (
