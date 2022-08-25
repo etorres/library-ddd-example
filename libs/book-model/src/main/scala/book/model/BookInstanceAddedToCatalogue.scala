@@ -1,7 +1,6 @@
 package es.eriktorr.library
-package lending.model
+package book.model
 
-import book.model.BookInstance
 import shared.DomainEvent
 import shared.refined.types.UUID
 

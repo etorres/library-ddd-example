@@ -10,7 +10,7 @@ import munit.ScalaCheckSuite
 
 final class BookInstanceAvroSuite extends ScalaCheckSuite with BookInstanceAvroCodec:
 
-  property("book instance encoding is reversible") {
+  property("book instance avro encoding is reversible") {
     AvroRoundTripSuite.checkUsing[BookInstance](
       bookInstanceGen(),
       bookInstanceAvroCodec,

@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package lending.integration
 
-import lending.infrastructure.BookInstanceAddedToCatalogueAvroCodec
+import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
 import shared.infrastructure.KafkaConfig
 import shared.infrastructure.TestFilters.online
 
@@ -22,7 +22,7 @@ final class AvroSchemaCompatibilitySuite
 
   override def munitFixtures: Seq[Fixture[?]] = List(checker)
 
-  test("book instance added to catalogue event schema should be compatible".tag(online)) {
+  test("book instance added to catalogue schema should be compatible".tag(online)) {
     checker()
       .checkReaderCompatibility(
         bookInstanceAddedToCatalogueAvroCodec,

@@ -2,6 +2,7 @@ package es.eriktorr.library
 package book.infrastructure
 
 import book.model.*
+import shared.infrastructure.TimeGenerators.instantArbitrary
 import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
 
 import org.scalacheck.Gen
@@ -28,3 +29,9 @@ object BookGenerators:
     isbn <- isbnGen
     bookType <- Gen.oneOf(BookType.values.toList)
   yield BookInstance(uuid, isbn, bookType)
+
+  val bookInstanceAddedToCatalogueGen: Gen[BookInstanceAddedToCatalogue] = for
+    eventId <- uuidGen
+    when <- instantArbitrary.arbitrary
+    bookInstance <- bookInstanceGen()
+  yield BookInstanceAddedToCatalogue(eventId, when, bookInstance)

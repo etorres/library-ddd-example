@@ -13,6 +13,7 @@ lazy val catalogue = project
   .dependsOn(
     `book-model` % "test->test;compile->compile",
     `commons-jdbc` % "test->test;compile->compile",
+    `commons-kafka` % "test->test;compile->compile",
     `commons-lang` % "test->test;compile->compile",
   )
   .mainDependencies(
@@ -26,6 +27,7 @@ lazy val catalogue = project
     doobieHikari,
     doobiePostgres,
     fs2Core,
+    fs2Kafka,
     hikariCP,
     log4catsCore,
     log4catsSlf4j,
@@ -53,10 +55,14 @@ lazy val lending =
       catsCore,
       catsEffect,
       catsEffectKernel,
+      catsEffectStd,
       catsFree,
+      ciris,
       fs2Core,
+      fs2Kafka,
       log4catsCore,
       log4catsSlf4j,
+      scopt,
       vulcan,
     )
     .runtimeDependencies(log4jApi, log4jCore, log4jSlf4jImpl)
@@ -105,6 +111,7 @@ lazy val `commons-kafka` = project
     catsCore,
     catsEffect,
     catsEffectKernel,
+    ciris,
     fs2Kafka,
     fs2KafkaVulcan,
     schemaRegistryClient,

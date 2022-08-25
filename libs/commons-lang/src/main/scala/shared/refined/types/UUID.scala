@@ -26,6 +26,8 @@ object UUID:
 
   given Show[UUID] = Show.show(_.value)
 
+  val nil: UUID = unsafeFrom("00000000-0000-0000-0000-000000000000")
+
   sealed abstract class UUIDValidationError(message: String) extends ValidationError(message)
 
   object UUIDValidationError:

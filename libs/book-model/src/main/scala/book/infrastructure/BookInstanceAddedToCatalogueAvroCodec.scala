@@ -1,8 +1,7 @@
 package es.eriktorr.library
-package lending.infrastructure
+package book.infrastructure
 
-import book.infrastructure.BookInstanceAvroCodec
-import lending.model.BookInstanceAddedToCatalogue
+import book.model.BookInstanceAddedToCatalogue
 import shared.Namespaces
 import shared.refined.types.infrastructure.UUIDAvroCodec
 
