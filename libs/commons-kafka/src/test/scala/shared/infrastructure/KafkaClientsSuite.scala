@@ -1,7 +1,8 @@
 package es.eriktorr.library
-package infrastructure.kafka
+package shared.infrastructure
 
-import infrastructure.kafka.KafkaClients.{KafkaConsumerIO, KafkaProducerIO}
+import shared.infrastructure.KafkaClients
+import shared.infrastructure.KafkaClients.{KafkaConsumerIO, KafkaProducerIO}
 
 import cats.effect.IO
 import munit.{CatsEffectSuite, ScalaCheckEffectSuite}

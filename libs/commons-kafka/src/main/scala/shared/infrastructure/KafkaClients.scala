@@ -1,5 +1,5 @@
 package es.eriktorr.library
-package infrastructure.kafka
+package shared.infrastructure
 
 import _root_.vulcan.Codec
 import cats.effect.{IO, Resource}

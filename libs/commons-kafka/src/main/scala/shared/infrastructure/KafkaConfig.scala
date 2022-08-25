@@ -1,7 +1,7 @@
 package es.eriktorr.library
-package infrastructure.kafka
+package shared.infrastructure
 
-import infrastructure.kafka.KafkaConfig.{BootstrapServer, ConsumerGroup, SchemaRegistry, Topic}
+import shared.infrastructure.KafkaConfig.{BootstrapServer, ConsumerGroup, SchemaRegistry, Topic}
 
 import cats.data.NonEmptyList
 
