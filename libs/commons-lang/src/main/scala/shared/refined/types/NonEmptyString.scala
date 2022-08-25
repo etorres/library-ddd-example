@@ -1,8 +1,9 @@
 package es.eriktorr.library
-package refined.types
+package shared.refined.types
 
-import refined.types.NonEmptyString.NonEmptyStringValidationError.StringIsEmpty
-import validated.AllErrorsOr
+import shared.ValidationError
+import shared.refined.types.NonEmptyString.NonEmptyStringValidationError.StringIsEmpty
+import shared.validated.AllErrorsOr
 
 import cats.Show
 import cats.syntax.all.*

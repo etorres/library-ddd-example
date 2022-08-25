@@ -1,9 +1,9 @@
 package es.eriktorr.library
 package lending.integration
 
-import infrastructure.TestFilters.online
 import infrastructure.kafka.KafkaConfig
 import lending.infrastructure.BookInstanceAddedToCatalogueAvroCodec
+import shared.infrastructure.TestFilters.online
 
 import fs2.kafka.vulcan.SchemaRegistryClientSettings
 import fs2.kafka.vulcan.testkit.SchemaSuite

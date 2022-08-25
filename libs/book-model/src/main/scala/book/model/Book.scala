@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package book.model
 
-import validated.AllErrorsOr
+import shared.validated.AllErrorsOr
 
 import cats.syntax.all.*
 

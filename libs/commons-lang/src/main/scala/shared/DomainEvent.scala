@@ -1,6 +1,7 @@
 package es.eriktorr.library
+package shared
 
-import refined.types.UUID
+import shared.refined.types.UUID
 
 import java.time.Instant
 

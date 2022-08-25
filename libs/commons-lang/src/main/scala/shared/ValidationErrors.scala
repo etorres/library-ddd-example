@@ -1,4 +1,5 @@
 package es.eriktorr.library
+package shared
 
 import cats.data.NonEmptyChain
 

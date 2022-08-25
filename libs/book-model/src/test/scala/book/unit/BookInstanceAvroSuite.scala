@@ -4,7 +4,7 @@ package book.unit
 import book.infrastructure.BookGenerators.bookInstanceGen
 import book.infrastructure.BookInstanceAvroCodec
 import book.model.BookInstance
-import infrastructure.AvroRoundTripSuite
+import shared.infrastructure.AvroRoundTripSuite
 
 import munit.ScalaCheckSuite
 

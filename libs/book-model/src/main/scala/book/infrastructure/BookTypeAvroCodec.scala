@@ -2,6 +2,7 @@ package es.eriktorr.library
 package book.infrastructure
 
 import book.model.BookType
+import shared.Namespaces
 
 import cats.syntax.either.*
 import vulcan.{AvroError, Codec}

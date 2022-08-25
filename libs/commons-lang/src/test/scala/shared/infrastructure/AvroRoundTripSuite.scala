@@ -1,5 +1,5 @@
 package es.eriktorr.library
-package infrastructure
+package shared.infrastructure
 
 import munit.ScalaCheckSuite
 import org.scalacheck.Prop.forAll

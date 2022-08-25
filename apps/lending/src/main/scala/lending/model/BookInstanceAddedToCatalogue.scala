@@ -2,7 +2,8 @@ package es.eriktorr.library
 package lending.model
 
 import book.model.BookInstance
-import refined.types.UUID
+import shared.DomainEvent
+import shared.refined.types.UUID
 
 import java.time.Instant
 

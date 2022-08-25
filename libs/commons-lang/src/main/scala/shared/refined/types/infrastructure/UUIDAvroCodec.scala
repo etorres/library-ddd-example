@@ -1,7 +1,8 @@
 package es.eriktorr.library
-package book.infrastructure
+package shared.refined.types.infrastructure
 
-import refined.types.UUID
+import shared.ValidationErrors
+import shared.refined.types.UUID
 
 import cats.syntax.either.*
 import vulcan.{AvroError, Codec}

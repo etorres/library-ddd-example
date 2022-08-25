@@ -1,7 +1,9 @@
 package es.eriktorr.library
+package shared
 
-import cats.data.{Validated, ValidatedNec}
-import cats.effect.IO
+import shared.ValidationError
+
+import cats.data.ValidatedNec
 
 package object validated:
   type AllErrorsOr[A] = ValidatedNec[ValidationError, A]

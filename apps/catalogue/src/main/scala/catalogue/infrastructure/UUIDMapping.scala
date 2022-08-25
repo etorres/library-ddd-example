@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package catalogue.infrastructure
 
-import refined.types.UUID
+import shared.refined.types.UUID
 
 import doobie.postgres.*
 import doobie.postgres.implicits.*

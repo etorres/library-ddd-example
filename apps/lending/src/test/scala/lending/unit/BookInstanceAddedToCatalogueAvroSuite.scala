@@ -1,10 +1,10 @@
 package es.eriktorr.library
-package lending.integration
+package lending.unit
 
-import book.infrastructure.AvroRoundTripSuite
 import lending.infrastructure.BookInstanceAddedToCatalogueAvroCodec
 import lending.infrastructure.LendingGenerators.bookInstanceAddedToCatalogueGen
 import lending.model.BookInstanceAddedToCatalogue
+import shared.infrastructure.AvroRoundTripSuite
 
 import munit.ScalaCheckSuite
 import org.scalacheck.Prop.forAll

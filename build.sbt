@@ -6,7 +6,7 @@ sbtSettings
 lazy val `library-ddd-example` =
   project
     .root("library-ddd-example")
-    .aggregate(`book-model`, `commons-jdbc`, `commons-kafka`, `commons-lang`, catalogue, lending)
+    .aggregate(`book-model`, catalogue, `commons-jdbc`, `commons-kafka`, `commons-lang`, lending)
 
 lazy val catalogue = project
   .application("catalogue")
@@ -74,9 +74,9 @@ lazy val `book-model` =
   project
     .library("book-model")
     .dependsOn(`commons-lang` % "test->test;compile->compile")
-    .mainDependencies(catsCore, catsKernel, catsFree)
-    .optionalDependencies(avro, vulcan)
-    .testDependencies(munit, scalacheck)
+    .mainDependencies(catsCore, catsKernel)
+    .optionalDependencies(avro, catsFree, vulcan)
+    .testDependencies(log4jApi, log4jCore, log4jSlf4jImpl, munit, scalacheck)
 
 lazy val `commons-jdbc` =
   project
@@ -121,8 +121,8 @@ lazy val `commons-kafka` = project
 lazy val `commons-lang` =
   project
     .library("commons-lang")
-    .mainDependencies(catsCore, catsEffect, catsFree)
-    .optionalDependencies(avro, vulcan)
+    .mainDependencies(catsCore, catsEffect)
+    .optionalDependencies(avro, catsFree, vulcan)
     .testDependencies(
       munit,
       munitCatsEffect,

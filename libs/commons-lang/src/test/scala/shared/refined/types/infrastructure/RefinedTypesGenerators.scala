@@ -1,7 +1,7 @@
 package es.eriktorr.library
-package refined.types.infrastructure
+package shared.refined.types.infrastructure
 
-import refined.types.{NonEmptyString, UUID}
+import shared.refined.types.{NonEmptyString, UUID}
 
 import org.scalacheck.Gen
 

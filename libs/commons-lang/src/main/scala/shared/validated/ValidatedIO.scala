@@ -1,5 +1,7 @@
 package es.eriktorr.library
-package validated
+package shared.validated
+
+import shared.ValidationErrors
 
 import cats.data.Validated
 import cats.effect.IO

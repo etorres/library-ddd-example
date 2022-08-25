@@ -1,8 +1,9 @@
 package es.eriktorr.library
-package refined.types
+package shared.refined.types
 
-import refined.types.UUID.UUIDValidationError.UUIDInvalidFormat
-import validated.AllErrorsOr
+import shared.ValidationError
+import shared.refined.types.UUID.UUIDValidationError.UUIDInvalidFormat
+import shared.validated.AllErrorsOr
 
 import cats.Show
 import cats.syntax.all.*

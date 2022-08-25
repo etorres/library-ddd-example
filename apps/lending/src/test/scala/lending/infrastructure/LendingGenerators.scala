@@ -1,9 +1,9 @@
 package es.eriktorr.library
 package lending.infrastructure
 
-import es.eriktorr.library.book.infrastructure.BookGenerators.bookInstanceGen
+import book.infrastructure.BookGenerators.bookInstanceGen
 import lending.model.BookInstanceAddedToCatalogue
-import refined.types.infrastructure.RefinedTypesGenerators.uuidGen
+import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
 
 import org.scalacheck.{Arbitrary, Gen}
 

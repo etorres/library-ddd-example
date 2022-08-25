@@ -1,8 +1,10 @@
 package es.eriktorr.library
 package lending.infrastructure
 
-import book.infrastructure.{BookInstanceAvroCodec, UUIDAvroCodec}
+import book.infrastructure.BookInstanceAvroCodec
 import lending.model.BookInstanceAddedToCatalogue
+import shared.Namespaces
+import shared.refined.types.infrastructure.UUIDAvroCodec
 
 import cats.syntax.apply.*
 import vulcan.{AvroError, Codec}

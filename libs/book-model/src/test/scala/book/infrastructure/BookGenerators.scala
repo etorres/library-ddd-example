@@ -2,7 +2,7 @@ package es.eriktorr.library
 package book.infrastructure
 
 import book.model.*
-import refined.types.infrastructure.RefinedTypesGenerators.uuidGen
+import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
 
 import org.scalacheck.Gen
 

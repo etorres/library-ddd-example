@@ -2,6 +2,8 @@ package es.eriktorr.library
 package book.infrastructure
 
 import book.model.BookInstance
+import shared.Namespaces
+import shared.refined.types.infrastructure.UUIDAvroCodec
 
 import cats.syntax.apply.*
 import vulcan.Codec

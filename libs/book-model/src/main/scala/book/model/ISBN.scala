@@ -2,7 +2,8 @@ package es.eriktorr.library
 package book.model
 
 import book.model.ISBN.ISBNValidationError.ISBNInvalidFormat
-import validated.AllErrorsOr
+import shared.ValidationError
+import shared.validated.AllErrorsOr
 
 import cats.syntax.all.*
 

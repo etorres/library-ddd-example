@@ -1,12 +1,17 @@
 package es.eriktorr.library
-package validated
+package shared.validated
 
-import refined.types.NonEmptyString.NonEmptyStringValidationError.StringIsEmpty
-import refined.types.UUID.UUIDValidationError.UUIDInvalidFormat
-import refined.types.infrastructure.RefinedTypesGenerators.{nonEmptyStringGen, uuidGen}
-import refined.types.{NonEmptyString, UUID}
-import validated.ValidatedIO.validatedNecIO
-import validated.ValidatedIOSuite.{testCaseGen, TestCase, TestResult}
+import es.eriktorr.library.shared.refined.types.infrastructure.RefinedTypesGenerators.{
+  nonEmptyStringGen,
+  uuidGen,
+}
+import shared.ValidationErrors
+import shared.refined.types.NonEmptyString.NonEmptyStringValidationError.StringIsEmpty
+import shared.refined.types.UUID.UUIDValidationError.UUIDInvalidFormat
+import shared.refined.types.{NonEmptyString, UUID}
+import shared.validated.AllErrorsOr
+import shared.validated.ValidatedIO.validatedNecIO
+import shared.validated.ValidatedIOSuite.{testCaseGen, TestCase, TestResult}
 
 import cats.data.{NonEmptyChain, Validated}
 import cats.syntax.all.*
@@ -22,7 +27,8 @@ final class ValidatedIOSuite extends CatsEffectSuite with ScalaCheckEffectSuite:
       expectedValidation match
         case Validated.Valid(value) => io.assertEquals(value)
         case Validated.Invalid(errors) =>
-          io.interceptMessage[ValidationErrors](ValidationErrors(errors).getMessage).map(_ => ())
+          io.interceptMessage[ValidationErrors](shared.ValidationErrors(errors).getMessage)
+            .map(_ => ())
     }
   }
 

@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package infrastructure.jdbc
 
-import refined.types.NonEmptyString
+import shared.refined.types.NonEmptyString
 
 import cats.effect.{IO, Resource}
 import cats.implicits.*
