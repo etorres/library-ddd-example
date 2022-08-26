@@ -52,21 +52,22 @@ lazy val lending =
       `commons-lang` % "test->test;compile->compile",
     )
     .mainDependencies(
-      avro,
       catsCore,
       catsEffect,
       catsEffectKernel,
       catsEffectStd,
-      catsFree,
       ciris,
+      doobieCore,
+      doobieHikari,
       fs2Core,
       fs2Kafka,
+      hikariCP,
       log4catsCore,
       log4catsSlf4j,
       scopt,
       vulcan,
     )
-    .runtimeDependencies(log4jApi, log4jCore, log4jSlf4jImpl)
+    .runtimeDependencies(doobiePostgres, log4jApi, log4jCore, log4jSlf4jImpl)
     .testDependencies(
       fs2kafkaVulcanTestkitMunit,
       munit,
@@ -90,6 +91,7 @@ lazy val `commons-jdbc` =
     .library("commons-jdbc")
     .dependsOn(`commons-lang` % "test->test;compile->compile")
     .mainDependencies(
+      catsCore,
       catsEffect,
       catsEffectKernel,
       ciris,
@@ -130,7 +132,7 @@ lazy val `commons-lang` =
   project
     .library("commons-lang")
     .mainDependencies(catsCore, catsEffect)
-    .optionalDependencies(avro, catsFree, doobieCore, doobiePostgres, vulcan)
+    .optionalDependencies(avro, doobieCore, doobiePostgres, vulcan)
     .testDependencies(
       munit,
       munitCatsEffect,

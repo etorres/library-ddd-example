@@ -1,10 +1,13 @@
 package es.eriktorr.library
 package lending
 
-import shared.infrastructure.JdbcConfig
 import shared.infrastructure.KafkaConfig.{BootstrapServer, ConsumerGroup, SchemaRegistry, Topic}
-import shared.infrastructure.{KafkaConfig, KafkaConfigConfigDecoder}
-import shared.infrastructure.NonEmptyStringConfigDecoder
+import shared.infrastructure.{
+  JdbcConfig,
+  KafkaConfig,
+  KafkaConfigConfigDecoder,
+  NonEmptyStringConfigDecoder,
+}
 import shared.refined.types.NonEmptyString
 
 import cats.data.NonEmptyList
@@ -46,7 +49,7 @@ object LendingConfiguration extends KafkaConfigConfigDecoder with NonEmptyString
           jdbcDriverClassName.getOrElse(JdbcConfig.default.driverClassName),
           jdbcConnectUrl.getOrElse(JdbcConfig.default.connectUrl),
           jdbcUser.getOrElse(JdbcConfig.default.user),
-          jdbcPassword
+          jdbcPassword,
         ),
         KafkaConfig(
           kafkaBootstrapServers.getOrElse(BootstrapServer.default),
