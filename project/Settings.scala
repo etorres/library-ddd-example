@@ -47,6 +47,17 @@ object Settings {
     ThisBuild / semanticdbEnabled := true,
     ThisBuild / semanticdbVersion := scalafixSemanticdb.revision,
     Test / testOptions += Tests.Argument(MUnitFramework, "--exclude-tags=online"),
+    Test / envVars := Map(
+      "SBT_TEST_ENV_VARS" -> "true",
+      "JDBC_DRIVER_CLASS_NAME" -> "org.postgresql.Driver",
+      "JDBC_CONNECT_URL" -> "jdbc:postgresql://localhost:5432/test_db",
+      "JDBC_USER" -> "test_jdbc_user",
+      "JDBC_PASSWORD" -> "test_jdbc_password",
+      "KAFKA_BOOTSTRAP_SERVERS" -> "localhost:29092",
+      "KAFKA_CONSUMER_GROUP" -> "test_kafka_consumer_group",
+      "KAFKA_TOPIC" -> "test_kafka_topic",
+      "KAFKA_SCHEMA_REGISTRY" -> "http://localhost:8081",
+    ),
     scalacOptions ++= Seq(
       "-Xfatal-warnings",
       "-deprecation",

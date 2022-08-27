@@ -28,5 +28,5 @@ object KafkaTestConfig:
   private final lazy val (testBootstrapServers, testSchemaRegistry, testTopic) = (
     NonEmptyList.one(BootstrapServer.unsafeFrom("localhost:29092")), 
     SchemaRegistry.unsafeFrom("http://localhost:8081"), 
-    Topic.unsafeFrom("notifications-engine-tests")
+    Topic.unsafeFrom("library-tests")
   )

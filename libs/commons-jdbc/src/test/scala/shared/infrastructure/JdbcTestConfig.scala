@@ -15,10 +15,10 @@ enum JdbcTestConfig(val jdbcConfig: JdbcConfig, val schema: NonEmptyString):
   case Catalogue
       extends JdbcTestConfig(
         JdbcConfig(
-          driverClassName = JdbcTestConfig.postgresqlDriverClassName,
-          connectUrl = JdbcTestConfig.testConnectUrlFrom("catalogue"),
-          user = JdbcTestConfig.testUser("catalogue"),
-          password = JdbcTestConfig.testPassword,
+          JdbcTestConfig.postgresqlDriverClassName,
+          JdbcTestConfig.testConnectUrlFrom("catalogue"),
+          JdbcTestConfig.testUser("catalogue"),
+          JdbcTestConfig.testPassword,
         ),
         NonEmptyString.unsafeFrom("test_catalogue"),
       )
