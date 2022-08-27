@@ -16,7 +16,7 @@ final class JdbcAvailableBooks(transactor: Transactor[IO])
     with BookTypeJdbcMapping
     with UUIDJdbcMapping:
   override def add(availableBook: AvailableBook): IO[Unit] = IO.unit <* sql"""
-           INSERT INTO available_books_for_lending (book_id, book_type, book_state, available_at_branch)
+           INSERT INTO available_books (book_id, book_type, book_state, available_at_branch)
            VALUES (
              ${availableBook.bookId},
              ${availableBook.bookType},
@@ -26,6 +26,6 @@ final class JdbcAvailableBooks(transactor: Transactor[IO])
 
   override def findBy(bookId: UUID): IO[Option[AvailableBook]] = sql"""
              SELECT book_id, book_type, available_at_branch 
-             FROM available_books_for_lending 
+             FROM available_books 
              WHERE
                book_id = $bookId""".query[AvailableBook].option.transact(transactor)

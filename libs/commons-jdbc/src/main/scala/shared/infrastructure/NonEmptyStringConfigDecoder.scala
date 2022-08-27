@@ -7,9 +7,9 @@ import cats.data.Validated
 import ciris.{ConfigDecoder, ConfigError}
 
 trait NonEmptyStringConfigDecoder:
-  implicit def nonEmptyStringServerConfigDecoder: ConfigDecoder[String, NonEmptyString] = 
-    ConfigDecoder.lift(string => 
+  implicit def nonEmptyStringServerConfigDecoder: ConfigDecoder[String, NonEmptyString] =
+    ConfigDecoder.lift(string =>
       NonEmptyString.from(string) match
-       case Validated.Valid(value) => Right(value)
-       case Validated.Invalid(_) => Left(ConfigError("Invalid bootstrap server"))
+        case Validated.Valid(value) => Right(value)
+        case Validated.Invalid(_) => Left(ConfigError("Invalid bootstrap server")),
     )

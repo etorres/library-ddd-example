@@ -2,7 +2,7 @@ package es.eriktorr.library
 package lending.integration
 
 import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
-import shared.infrastructure.KafkaConfig
+import shared.infrastructure.KafkaTestConfig
 import shared.infrastructure.TestFilters.online
 
 import fs2.kafka.vulcan.SchemaRegistryClientSettings
@@ -16,8 +16,10 @@ final class AvroSchemaCompatibilitySuite
     with SchemaSuite
     with BookInstanceAddedToCatalogueAvroCodec:
 
-  private[this] val checker = compatibilityChecker(
-    SchemaRegistryClientSettings(KafkaConfig.default.schemaRegistry.value),
+  private[this] val kafkaConfig = KafkaTestConfig.Lending.kafkaConfig
+
+  private[this] lazy val checker = compatibilityChecker(
+    SchemaRegistryClientSettings(kafkaConfig.schemaRegistry.value),
   )
 
   override def munitFixtures: Seq[Fixture[?]] = List(checker)
@@ -26,7 +28,7 @@ final class AvroSchemaCompatibilitySuite
     checker()
       .checkReaderCompatibility(
         bookInstanceAddedToCatalogueAvroCodec,
-        s"${KafkaConfig.default.topic}-value",
+        s"${kafkaConfig.topic}-value",
       )
       .map(compatibility =>
         assertEquals(

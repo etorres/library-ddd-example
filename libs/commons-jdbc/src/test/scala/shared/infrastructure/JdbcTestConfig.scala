@@ -1,14 +1,42 @@
 package es.eriktorr.library
 package shared.infrastructure
 
+import shared.infrastructure.JdbcTestConfig.{
+  postgresqlDriverClassName,
+  testConnectUrlFrom,
+  testPassword,
+  testUser,
+}
 import shared.refined.types.NonEmptyString
 
 import ciris.Secret
 
+enum JdbcTestConfig(val jdbcConfig: JdbcConfig, val schema: NonEmptyString):
+  case Catalogue
+      extends JdbcTestConfig(
+        JdbcConfig(
+          driverClassName = JdbcTestConfig.postgresqlDriverClassName,
+          connectUrl = JdbcTestConfig.testConnectUrlFrom("catalogue"),
+          user = JdbcTestConfig.testUser("catalogue"),
+          password = JdbcTestConfig.testPassword,
+        ),
+        NonEmptyString.unsafeFrom("test_catalogue"),
+      )
+  case AvailableBooksForLending
+      extends JdbcTestConfig(
+        JdbcConfig(
+          JdbcTestConfig.postgresqlDriverClassName,
+          JdbcTestConfig.testConnectUrlFrom("lending"),
+          JdbcTestConfig.testUser("lending"),
+          JdbcTestConfig.testPassword,
+        ),
+        NonEmptyString.unsafeFrom("test_available_books"),
+      )
+
 object JdbcTestConfig:
-    val jdbcConfig: JdbcConfig = JdbcConfig(
-      NonEmptyString.unsafeFrom("org.postgresql.Driver"),
-      NonEmptyString.unsafeFrom("jdbc:postgresql://localhost:5432/library_db"),
-      NonEmptyString.unsafeFrom("library_user"),
-      Secret(NonEmptyString.unsafeFrom("changeme"))
-    )
+  final private lazy val postgresqlDriverClassName =
+    NonEmptyString.unsafeFrom("org.postgresql.Driver")
+  final private def testConnectUrlFrom(name: String) =
+    NonEmptyString.unsafeFrom(s"jdbc:postgresql://localhost:5432/${name}_db")
+  final private lazy val testPassword = Secret(NonEmptyString.unsafeFrom("changeme"))
+  final private def testUser(name: String) = NonEmptyString.unsafeFrom(s"${name}_user")

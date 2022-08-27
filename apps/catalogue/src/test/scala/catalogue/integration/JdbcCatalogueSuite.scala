@@ -5,14 +5,14 @@ import book.infrastructure.BookGenerators.{bookGen, bookInstanceGen}
 import book.model.{Book, BookInstance}
 import catalogue.infrastructure.JdbcCatalogue
 import catalogue.integration.JdbcCatalogueSuite.{testCaseGen, TestCase}
-import shared.infrastructure.JdbcTransactorsSuite
+import shared.infrastructure.{JdbcTestConfig, JdbcTransactorsSuite}
 
 import cats.effect.IO
 import org.scalacheck.Gen
 import org.scalacheck.effect.PropF.forAllF
 
 final class JdbcCatalogueSuite extends JdbcTransactorsSuite:
-  override def currentSchema: String = "test_book_catalogue"
+  override def jdbcTestConfig: JdbcTestConfig = JdbcTestConfig.Catalogue
 
   test("should add a new book instance to the catalogue") {
     forAllF(testCaseGen) { case TestCase(book, bookInstance) =>

@@ -3,12 +3,12 @@ package lending.integration
 
 import lending.infrastructure.LendingGenerators.availableBookGen
 import lending.infrastructure.JdbcAvailableBooks
-import shared.infrastructure.JdbcTransactorsSuite
+import shared.infrastructure.{JdbcTestConfig, JdbcTransactorsSuite}
 
 import org.scalacheck.effect.PropF.forAllF
 
 final class JdbcAvailableBooksSuite extends JdbcTransactorsSuite:
-  override def currentSchema: String = "test_available_books"
+  override def jdbcTestConfig: JdbcTestConfig = JdbcTestConfig.AvailableBooksForLending
 
   test("should create an available book for lending") {
     forAllF(availableBookGen) { availableBook =>

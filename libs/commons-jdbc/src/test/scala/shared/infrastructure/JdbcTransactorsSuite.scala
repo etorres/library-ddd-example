@@ -1,6 +1,8 @@
 package es.eriktorr.library
 package shared.infrastructure
 
+import shared.refined.types.NonEmptyString
+
 import cats.effect.IO
 import doobie.Transactor
 import doobie.util.ExecutionContexts
@@ -11,7 +13,7 @@ abstract class JdbcTransactorsSuite extends CatsEffectSuite with ScalaCheckEffec
   override def scalaCheckTestParameters: Test.Parameters =
     super.scalaCheckTestParameters.withMinSuccessfulTests(1).withWorkers(1)
 
-  def currentSchema: String
+  def jdbcTestConfig: JdbcTestConfig
 
   private[this] val connectEc = ExecutionContexts.synchronous
 
@@ -19,7 +21,7 @@ abstract class JdbcTransactorsSuite extends CatsEffectSuite with ScalaCheckEffec
     ResourceSuiteLocalFixture(
       "doobie-transactor",
       JdbcTestTransactor.testTransactorResource(
-        currentSchema,
+        jdbcTestConfig,
         connectEc,
       ),
     )

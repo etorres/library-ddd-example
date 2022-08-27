@@ -16,10 +16,9 @@ object KafkaClients:
   type KafkaConsumerIO[A] = KafkaConsumer[IO, String, A]
   type KafkaProducerIO[A] = KafkaProducer[IO, String, A]
 
-  def defaultKafkaClients[A](using
-      coderDecoder: Codec[A],
-  ): Resource[IO, (KafkaConsumerIO[A], KafkaProducerIO[A])] =
-    val kafkaConfig = KafkaConfig.default
+  def kafkaClientsUsing[A](
+    kafkaConfig: KafkaConfig,
+  )(using coderDecoder: Codec[A]): Resource[IO, (KafkaConsumerIO[A], KafkaProducerIO[A])] =
     Resource
       .eval[IO, (Resource[IO, KafkaConsumerIO[A]], Resource[IO, KafkaProducerIO[A]])] {
         avroSettingsFrom[A](kafkaConfig).map { avroSettings =>

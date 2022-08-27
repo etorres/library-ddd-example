@@ -25,14 +25,14 @@ final case class LendingConfiguration(jdbcConfig: JdbcConfig, kafkaConfig: Kafka
 
 object LendingConfiguration extends KafkaConfigConfigDecoder with NonEmptyStringConfigDecoder:
   private[this] val lendingConfiguration = (
-    env("JDBC_DRIVER_CLASS_NAME").as[NonEmptyString].option,
-    env("JDBC_CONNECT_URL").as[NonEmptyString].option,
-    env("JDBC_USER").as[NonEmptyString].option,
+    env("JDBC_DRIVER_CLASS_NAME").as[NonEmptyString],
+    env("JDBC_CONNECT_URL").as[NonEmptyString],
+    env("JDBC_USER").as[NonEmptyString],
     env("JDBC_PASSWORD").as[NonEmptyString].secret,
-    env("KAFKA_BOOTSTRAP_SERVERS").as[NonEmptyList[BootstrapServer]].option,
-    env("KAFKA_CONSUMER_GROUP").as[ConsumerGroup].option,
-    env("KAFKA_TOPIC").as[Topic].option,
-    env("KAFKA_SCHEMA_REGISTRY").as[SchemaRegistry].option,
+    env("KAFKA_BOOTSTRAP_SERVERS").as[NonEmptyList[BootstrapServer]],
+    env("KAFKA_CONSUMER_GROUP").as[ConsumerGroup],
+    env("KAFKA_TOPIC").as[Topic],
+    env("KAFKA_SCHEMA_REGISTRY").as[SchemaRegistry],
   ).parMapN {
     (
         jdbcDriverClassName,
@@ -45,18 +45,8 @@ object LendingConfiguration extends KafkaConfigConfigDecoder with NonEmptyString
         kafkaSchemaRegistry,
     ) =>
       LendingConfiguration(
-        JdbcConfig(
-          jdbcDriverClassName.getOrElse(JdbcConfig.default.driverClassName),
-          jdbcConnectUrl.getOrElse(JdbcConfig.default.connectUrl),
-          jdbcUser.getOrElse(JdbcConfig.default.user),
-          jdbcPassword,
-        ),
-        KafkaConfig(
-          kafkaBootstrapServers.getOrElse(BootstrapServer.default),
-          kafkaConsumerGroup.getOrElse(ConsumerGroup.default),
-          kafkaTopic.getOrElse(Topic.default),
-          kafkaSchemaRegistry.getOrElse(SchemaRegistry.default),
-        ),
+        JdbcConfig(jdbcDriverClassName, jdbcConnectUrl, jdbcUser, jdbcPassword),
+        KafkaConfig(kafkaBootstrapServers, kafkaConsumerGroup, kafkaTopic, kafkaSchemaRegistry),
       )
   }
 

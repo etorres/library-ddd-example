@@ -13,30 +13,30 @@ import scala.concurrent.ExecutionContext
 
 object JdbcTestTransactor:
   def testTransactorResource(
-      currentSchema: String,
+      jdbcTestConfig: JdbcTestConfig,
       connectEc: ExecutionContext,
   ): Resource[IO, HikariTransactor[IO]] = for
     transactor <- JdbcTransactor(
-      JdbcTestConfig.jdbcConfig.copy(connectUrl =
+      jdbcTestConfig.jdbcConfig.copy(connectUrl =
         NonEmptyString.unsafeFrom(
-          s"${JdbcTestConfig.jdbcConfig.connectUrl.value}?currentSchema=$currentSchema",
+          s"${jdbcTestConfig.jdbcConfig.connectUrl.value}?currentSchema=${jdbcTestConfig.schema.value}",
         ),
       ),
       connectEc,
     ).transactorResource
-    _ <- truncateAllTablesIn(transactor, currentSchema)
+    _ <- truncateAllTablesIn(transactor, jdbcTestConfig.schema)
   yield transactor
 
   private[this] def truncateAllTablesIn(
       transactor: Transactor[IO],
-      currentSchema: String,
+      schema: NonEmptyString,
   ): Resource[IO, Unit] =
     Resource.make {
       (for
         tableNames <- sql"""
             SELECT table_name
             FROM information_schema.tables
-            WHERE table_schema = $currentSchema
+            WHERE table_schema = ${schema.value}
             ORDER BY table_name""".query[String].to[List]
         _ <- tableNames
           .map(tableName => Fragment.const(s"TRUNCATE TABLE $tableName CASCADE"))
