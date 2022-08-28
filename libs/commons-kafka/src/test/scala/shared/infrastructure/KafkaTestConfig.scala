@@ -11,22 +11,28 @@ import shared.infrastructure.KafkaTestConfig.{testBootstrapServers, testSchemaRe
 import cats.data.NonEmptyList
 
 enum KafkaTestConfig(val kafkaConfig: KafkaConfig):
-  case Catalogue extends KafkaTestConfig(KafkaConfig(
-    KafkaTestConfig.testBootstrapServers,
-    ConsumerGroup.unsafeFrom("catalogue"),
-    KafkaTestConfig.testTopic,
-    KafkaTestConfig.testSchemaRegistry,
-  ))
-  case Lending extends KafkaTestConfig(KafkaConfig(
-    KafkaTestConfig.testBootstrapServers,
-    ConsumerGroup.unsafeFrom("lending"),
-    KafkaTestConfig.testTopic,
-    KafkaTestConfig.testSchemaRegistry,
-  ))
+  case Catalogue
+      extends KafkaTestConfig(
+        KafkaConfig(
+          KafkaTestConfig.testBootstrapServers,
+          ConsumerGroup.unsafeFrom("catalogue"),
+          KafkaTestConfig.testTopic,
+          KafkaTestConfig.testSchemaRegistry,
+        ),
+      )
+  case Lending
+      extends KafkaTestConfig(
+        KafkaConfig(
+          KafkaTestConfig.testBootstrapServers,
+          ConsumerGroup.unsafeFrom("lending"),
+          KafkaTestConfig.testTopic,
+          KafkaTestConfig.testSchemaRegistry,
+        ),
+      )
 
 object KafkaTestConfig:
-  private final lazy val (testBootstrapServers, testSchemaRegistry, testTopic) = (
-    NonEmptyList.one(BootstrapServer.unsafeFrom("localhost:29092")), 
-    SchemaRegistry.unsafeFrom("http://localhost:8081"), 
-    Topic.unsafeFrom("library-tests")
+  final private lazy val (testBootstrapServers, testSchemaRegistry, testTopic) = (
+    NonEmptyList.one(BootstrapServer.unsafeFrom("localhost:29092")),
+    SchemaRegistry.unsafeFrom("http://localhost:8081"),
+    Topic.unsafeFrom("library-tests"),
   )

@@ -1,5 +1,3 @@
 package shared.infrastructure
 
-class KafkaTestClients {
-  
-}
+class KafkaTestClients {}

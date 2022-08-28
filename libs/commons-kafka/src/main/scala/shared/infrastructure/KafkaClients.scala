@@ -17,7 +17,7 @@ object KafkaClients:
   type KafkaProducerIO[A] = KafkaProducer[IO, String, A]
 
   def kafkaClientsUsing[A](
-    kafkaConfig: KafkaConfig,
+      kafkaConfig: KafkaConfig,
   )(using coderDecoder: Codec[A]): Resource[IO, (KafkaConsumerIO[A], KafkaProducerIO[A])] =
     Resource
       .eval[IO, (Resource[IO, KafkaConsumerIO[A]], Resource[IO, KafkaProducerIO[A]])] {

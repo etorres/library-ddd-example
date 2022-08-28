@@ -16,12 +16,7 @@ import cats.syntax.parallel.*
 import ciris.env
 
 final case class LendingConfiguration(jdbcConfig: JdbcConfig, kafkaConfig: KafkaConfig):
-  def asString: String =
-    import scala.language.unsafeNulls
-    s"""bootstrap-servers=${kafkaConfig.bootstrapServers.toList.mkString(",")}, 
-       |consumer-group=${kafkaConfig.consumerGroup}, 
-       |topic=${kafkaConfig.topic}, 
-       |schema-registry=${kafkaConfig.schemaRegistry}""".stripMargin.replaceAll("\\R", "")
+  def asString: String = s"${jdbcConfig.asString}, ${kafkaConfig.asString}"
 
 object LendingConfiguration extends KafkaConfigConfigDecoder with NonEmptyStringConfigDecoder:
   private[this] val lendingConfiguration = (

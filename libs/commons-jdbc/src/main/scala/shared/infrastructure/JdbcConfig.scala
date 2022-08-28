@@ -10,4 +10,10 @@ final case class JdbcConfig(
     connectUrl: NonEmptyString,
     user: NonEmptyString,
     password: Secret[NonEmptyString],
-)
+):
+  def asString: String =
+    import scala.language.unsafeNulls
+    s"""driver-class-name=$driverClassName, 
+       |connect-url=$connectUrl, 
+       |user=$user, 
+       |password=$password""".stripMargin.replaceAll("\\R", "")

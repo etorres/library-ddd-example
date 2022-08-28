@@ -13,6 +13,13 @@ final case class KafkaConfig(
 ):
   def bootstrapServersAsString: String = bootstrapServers.toList.mkString(",")
 
+  def asString: String =
+    import scala.language.unsafeNulls
+    s"""bootstrap-servers=$bootstrapServersAsString, 
+       |consumer-group=$consumerGroup, 
+       |topic=$topic, 
+       |schema-registry=$schemaRegistry""".stripMargin.replaceAll("\\R", "")
+
 object KafkaConfig:
   opaque type BootstrapServer = String
 
