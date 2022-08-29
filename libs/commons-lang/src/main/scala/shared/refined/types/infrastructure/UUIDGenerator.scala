@@ -6,9 +6,9 @@ import shared.refined.types.UUID
 import cats.effect.IO
 import cats.effect.std.UUIDGen
 
-trait UUIDProvider:
-  def randomUUID: IO[UUID]
+trait UUIDGenerator[F[_]]:
+  def randomUUID: F[UUID]
 
-object UUIDProvider:
-  given UUIDProvider = new UUIDProvider():
+object UUIDGenerator:
+  given UUIDGenerator[IO] = new UUIDGenerator[IO]():
     override def randomUUID: IO[UUID] = UUIDGen.randomUUID[IO].map(UUID.fromJava)
