@@ -25,7 +25,7 @@ final class JdbcCatalogueSuite extends JdbcTransactorsSuite:
     }
   }
 
-  test("should fail with an error when adding an unmatched book instance to the catalogue") {
+  test("should reject adding a new book instance to the catalogue when book isbn does not exist") {
     forAllF(bookInstanceGen()) { bookInstance =>
       val catalogue = JdbcCatalogue(transactorFixture())
       val expectedErrorMessage =

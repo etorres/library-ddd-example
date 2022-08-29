@@ -19,8 +19,9 @@ final class FakeCatalogue(stateRef: Ref[IO, CatalogueState]) extends Catalogue:
   override def add(bookInstance: BookInstance): IO[Unit] = stateRef.update { currentState =>
     currentState.books
       .find { case (book, _) => book.isbn == bookInstance.isbn }
-      .fold(currentState) { case (book, bookInstances) =>
-        currentState.copy(currentState.books + (book -> (bookInstance :: bookInstances)))
+      .fold(throw IllegalStateException(s"There is no book with ISBN: ${bookInstance.isbn}")) {
+        case (book, bookInstances) =>
+          currentState.copy(currentState.books + (book -> (bookInstance :: bookInstances)))
       }
   }
 
