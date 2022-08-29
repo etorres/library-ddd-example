@@ -13,8 +13,12 @@ final class AddBookInstanceToCatalogue(
     eventPublisher: EventPublisher[BookInstanceAddedToCatalogue],
 )(using clock: Clock[IO], uuidGenerator: UUIDGenerator[IO]):
   def add(bookInstance: BookInstance): IO[Unit] = for
-    when <- clock.realTimeInstant
-    eventId <- uuidGenerator.randomUUID
     _ <- catalogue.add(bookInstance)
+    _ <- publishEvent(bookInstance)
+  yield ()
+
+  private[this] def publishEvent(bookInstance: BookInstance) = for
+    eventId <- uuidGenerator.randomUUID
+    when <- clock.realTimeInstant
     _ <- eventPublisher.publish(BookInstanceAddedToCatalogue(eventId, when, bookInstance))
   yield ()

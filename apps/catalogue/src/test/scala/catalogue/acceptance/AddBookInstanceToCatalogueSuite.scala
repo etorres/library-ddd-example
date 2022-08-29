@@ -65,10 +65,6 @@ object AddBookInstanceToCatalogueSuite:
 
   final private val noBookWithIsbn = for
     bookInstance <- bookInstanceGen()
-    eventId <- uuidGen
-    when <- instantArbitrary.arbitrary
     initialState = AddBookInstanceToCatalogueState.empty
-      .setInstants(List(when))
-      .setUUIDs(List(eventId))
-    expectedState = initialState.clearInstants.clearUUIDs
+    expectedState = initialState
   yield TestCase(bookInstance, initialState, expectedState)
