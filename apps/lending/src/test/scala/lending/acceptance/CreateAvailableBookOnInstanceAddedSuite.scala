@@ -1,13 +1,12 @@
 package es.eriktorr.library
 package lending.acceptance
 
-import book.infrastructure.BookGenerators.bookInstanceGen
+import book.infrastructure.BookGenerators.bookInstanceAddedToCatalogueGen
 import book.model.BookInstanceAddedToCatalogue
 import lending.acceptance.CreateAvailableBookOnInstanceAddedSuite.testCaseGen
 import lending.infrastructure.CreateAvailableBookOnInstanceAddedSuiteRunner
 import lending.infrastructure.CreateAvailableBookOnInstanceAddedSuiteRunner.CreateAvailableBookOnInstanceAddedState
 import lending.model.AvailableBook
-import shared.infrastructure.TimeGenerators.instantArbitrary
 import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
 
 import munit.{CatsEffectSuite, ScalaCheckEffectSuite}
@@ -39,14 +38,12 @@ object CreateAvailableBookOnInstanceAddedSuite:
   )
 
   final private val testCaseGen = for
-    bookInstance <- bookInstanceGen()
-    eventId <- uuidGen
-    when <- instantArbitrary.arbitrary
+    bookInstanceAddedToCatalogue <- bookInstanceAddedToCatalogueGen
     libraryBranchId <- uuidGen
     initialState = CreateAvailableBookOnInstanceAddedState
       .from(libraryBranchId)
-      .setEvents(List(BookInstanceAddedToCatalogue(eventId, when, bookInstance)))
+      .setEvents(List(bookInstanceAddedToCatalogue))
     expectedState = initialState.clearEvents.setAvailableBooks(
-      List(AvailableBook.from(bookInstance, libraryBranchId)),
+      List(AvailableBook.from(bookInstanceAddedToCatalogue.bookInstance, libraryBranchId)),
     )
   yield TestCase(initialState, expectedState)
