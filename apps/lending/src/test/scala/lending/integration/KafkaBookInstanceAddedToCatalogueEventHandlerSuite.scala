@@ -23,7 +23,7 @@ final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
     forAllF(bookInstanceAddedToCatalogueGen) { event =>
       val (consumer, producer) = kafkaClientsFixture()
       for
-        eventHandlerStateRef <- Ref.of[IO, EventHandlerState[BookInstanceAddedToCatalogue]](
+        stateRef <- Ref.of[IO, EventHandlerState[BookInstanceAddedToCatalogue]](
           EventHandlerState.empty,
         )
         _ <- producer.produce(
@@ -34,7 +34,7 @@ final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
         eventHandler = KafkaBookInstanceAddedToCatalogueEventHandler(consumer)
         _ <- eventHandler
           .handleWith(event =>
-            eventHandlerStateRef.update(currentState =>
+            stateRef.update(currentState =>
               currentState.copy(event :: currentState.events),
             ),
           )
@@ -42,8 +42,8 @@ final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
           .take(1)
           .compile
           .drain
-        finalEventHandlerState <- eventHandlerStateRef.get
-      yield assertEquals(finalEventHandlerState.events, List(event))
+        finalState <- stateRef.get
+      yield assertEquals(finalState.events, List(event))
     }
   }
 
