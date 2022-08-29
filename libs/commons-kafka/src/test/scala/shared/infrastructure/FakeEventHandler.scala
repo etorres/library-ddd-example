@@ -8,13 +8,18 @@ import fs2.Stream
 
 final class FakeEventHandler[A](stateRef: Ref[IO, EventHandlerState[A]]) extends EventHandler[A]:
   override def handleWith(f: A => IO[Unit]): Stream[IO, Unit] =
-    Stream.eval(stateRef.update { currentState =>
-      currentState.events match
-        case ::(head, next) =>
-          f.apply(head)
-          currentState.copy(events = next)
-        case Nil => currentState
-    })
+    Stream.exec(
+      for
+        headEvent <- stateRef
+          .getAndUpdate { currentState =>
+            currentState.events match
+              case ::(_, next) => currentState.copy(events = next)
+              case Nil => currentState
+          }
+          .map(_.events.headOption)
+        _ <- headEvent.fold(IO.unit)(f.apply)
+      yield (),
+    )
 
 object FakeEventHandler:
   final case class EventHandlerState[A](events: List[A]):

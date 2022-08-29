@@ -4,8 +4,8 @@ package lending.acceptance
 import book.infrastructure.BookGenerators.bookInstanceGen
 import book.model.BookInstanceAddedToCatalogue
 import lending.acceptance.CreateAvailableBookOnInstanceAddedSuite.testCaseGen
-import lending.infrastructure.CreateAvailableBookOnInstanceAddedRunner
-import lending.infrastructure.CreateAvailableBookOnInstanceAddedRunner.CreateAvailableBookOnInstanceAddedState
+import lending.infrastructure.CreateAvailableBookOnInstanceAddedSuiteRunner
+import lending.infrastructure.CreateAvailableBookOnInstanceAddedSuiteRunner.CreateAvailableBookOnInstanceAddedState
 import lending.model.AvailableBook
 import shared.infrastructure.TimeGenerators.instantArbitrary
 import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
@@ -21,7 +21,7 @@ final class CreateAvailableBookOnInstanceAddedSuite
 
   test("should create an available book when a new books instance is added") {
     forAllF(testCaseGen) { testCase =>
-      CreateAvailableBookOnInstanceAddedRunner
+      CreateAvailableBookOnInstanceAddedSuiteRunner
         .runWith(testCase.initialState)(
           _.handle.timeout(30.seconds).take(1).compile.drain,
         )

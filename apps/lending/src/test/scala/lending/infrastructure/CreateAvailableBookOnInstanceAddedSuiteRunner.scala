@@ -12,7 +12,7 @@ import shared.refined.types.UUID
 
 import cats.effect.{IO, Ref}
 
-object CreateAvailableBookOnInstanceAddedRunner:
+object CreateAvailableBookOnInstanceAddedSuiteRunner:
   final case class CreateAvailableBookOnInstanceAddedState(
       availableBooksState: AvailableBooksState,
       eventHandlerState: EventHandlerState[BookInstanceAddedToCatalogue],

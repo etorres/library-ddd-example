@@ -9,9 +9,6 @@ import cats.effect.{IO, Ref}
 
 final class FakeAvailableBooks(stateRef: Ref[IO, AvailableBooksState]) extends AvailableBooks:
   override def add(availableBook: AvailableBook): IO[Unit] =
-    // TODO
-    println(s"\n\n >> HANDLED: $availableBook\n")
-    // TODO
     stateRef.update(currentState => currentState.copy(availableBook :: currentState.availableBooks))
 
   override def findBy(bookId: UUID): IO[Option[AvailableBook]] =

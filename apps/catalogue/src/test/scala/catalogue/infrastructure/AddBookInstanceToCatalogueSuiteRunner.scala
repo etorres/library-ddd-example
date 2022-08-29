@@ -15,7 +15,7 @@ import cats.effect.{Clock, IO, Ref}
 
 import java.time.Instant
 
-object AddBookInstanceToCatalogueRunner:
+object AddBookInstanceToCatalogueSuiteRunner:
   final case class AddBookInstanceToCatalogueState(
       catalogueState: CatalogueState,
       clockState: ClockState,

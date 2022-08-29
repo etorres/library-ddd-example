@@ -5,8 +5,8 @@ import book.infrastructure.BookGenerators.{bookGen, bookInstanceGen}
 import book.model.{BookInstance, BookInstanceAddedToCatalogue}
 import catalogue.acceptance.AddBookInstanceToCatalogueSuite.{noBookWithIsbn, thereIsABookWithIsbn}
 import catalogue.application.AddBookInstanceToCatalogue
-import catalogue.infrastructure.AddBookInstanceToCatalogueRunner
-import catalogue.infrastructure.AddBookInstanceToCatalogueRunner.AddBookInstanceToCatalogueState
+import catalogue.infrastructure.AddBookInstanceToCatalogueSuiteRunner
+import catalogue.infrastructure.AddBookInstanceToCatalogueSuiteRunner.AddBookInstanceToCatalogueState
 import shared.infrastructure.TimeGenerators.instantArbitrary
 import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
 
@@ -18,7 +18,7 @@ final class AddBookInstanceToCatalogueSuite extends CatsEffectSuite with ScalaCh
 
   test("should add a new book instance to the catalogue") {
     forAllF(thereIsABookWithIsbn) { testCase =>
-      AddBookInstanceToCatalogueRunner
+      AddBookInstanceToCatalogueSuiteRunner
         .runWith(testCase.initialState)(_.add(testCase.bookInstance))
         .map { case (result, finalState) =>
           assert(result.isRight)
@@ -29,7 +29,7 @@ final class AddBookInstanceToCatalogueSuite extends CatsEffectSuite with ScalaCh
 
   test("should not publish any event when adding a new book instance if catalogue fails") {
     forAllF(noBookWithIsbn) { testCase =>
-      AddBookInstanceToCatalogueRunner
+      AddBookInstanceToCatalogueSuiteRunner
         .runWith(testCase.initialState)(_.add(testCase.bookInstance))
         .map { case (result, finalState) =>
           assert(result.isLeft)
