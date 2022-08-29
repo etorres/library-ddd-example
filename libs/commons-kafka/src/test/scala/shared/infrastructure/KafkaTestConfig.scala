@@ -15,7 +15,7 @@ enum KafkaTestConfig(val kafkaConfig: KafkaConfig):
       extends KafkaTestConfig(
         KafkaConfig(
           KafkaTestConfig.testBootstrapServers,
-          ConsumerGroup.unsafeFrom("catalogue"),
+          ConsumerGroup.unsafeFrom("library"),
           KafkaTestConfig.testTopic,
           KafkaTestConfig.testSchemaRegistry,
         ),
@@ -24,7 +24,7 @@ enum KafkaTestConfig(val kafkaConfig: KafkaConfig):
       extends KafkaTestConfig(
         KafkaConfig(
           KafkaTestConfig.testBootstrapServers,
-          ConsumerGroup.unsafeFrom("lending"),
+          ConsumerGroup.unsafeFrom("library"),
           KafkaTestConfig.testTopic,
           KafkaTestConfig.testSchemaRegistry,
         ),
