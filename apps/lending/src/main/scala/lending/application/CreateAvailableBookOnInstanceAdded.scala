@@ -1,7 +1,9 @@
 package es.eriktorr.library
 package lending.application
 
-import lending.model.{AvailableBook, AvailableBooks, BookInstanceAddedToCatalogueEventHandler}
+import book.model.BookInstanceAddedToCatalogue
+import lending.model.{AvailableBook, AvailableBooks}
+import shared.infrastructure.EventHandler
 import shared.infrastructure.KafkaClients.KafkaConsumerIO
 import shared.refined.types.UUID
 
@@ -10,12 +12,11 @@ import fs2.Stream
 
 final class CreateAvailableBookOnInstanceAdded(
     availableBooks: AvailableBooks,
-    bookInstanceAddedToCatalogueEventHandler: BookInstanceAddedToCatalogueEventHandler,
+    eventHandler: EventHandler[BookInstanceAddedToCatalogue],
     libraryBranchId: UUID,
 ):
-  def handle: Stream[IO, Unit] = for _ <- bookInstanceAddedToCatalogueEventHandler.handleWith {
-      event =>
-        val availableBook = AvailableBook.from(event.bookInstance, libraryBranchId)
-        availableBooks.add(availableBook)
+  def handle: Stream[IO, Unit] = for _ <- eventHandler.handleWith { event =>
+      val availableBook = AvailableBook.from(event.bookInstance, libraryBranchId)
+      availableBooks.add(availableBook)
     }
   yield ()

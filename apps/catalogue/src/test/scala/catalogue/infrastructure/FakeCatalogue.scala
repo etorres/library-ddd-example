@@ -16,6 +16,7 @@ final class FakeCatalogue(stateRef: Ref[IO, CatalogueState]) extends Catalogue:
       }),
     )
 
+  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
   override def add(bookInstance: BookInstance): IO[Unit] = stateRef.update { currentState =>
     currentState.books
       .find { case (book, _) => book.isbn == bookInstance.isbn }

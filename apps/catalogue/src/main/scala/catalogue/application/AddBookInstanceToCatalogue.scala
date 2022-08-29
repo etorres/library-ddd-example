@@ -2,7 +2,7 @@ package es.eriktorr.library
 package catalogue.application
 
 import book.model.{BookInstance, BookInstanceAddedToCatalogue}
-import catalogue.model.{BookInstanceAddedToCatalogueEventPublisher, Catalogue}
+import catalogue.model.Catalogue
 import shared.infrastructure.EventPublisher
 import shared.refined.types.infrastructure.UUIDGenerator
 

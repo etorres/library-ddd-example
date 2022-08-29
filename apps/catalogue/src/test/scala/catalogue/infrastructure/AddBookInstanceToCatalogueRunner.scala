@@ -15,35 +15,39 @@ import cats.effect.{Clock, IO, Ref}
 
 import java.time.Instant
 
-final case class AddBookInstanceToCatalogueState(
-    catalogueState: CatalogueState,
-    clockState: ClockState,
-    eventPublisherState: EventPublisherState[BookInstanceAddedToCatalogue],
-    uuidGeneratorState: UUIDGeneratorState,
-):
-  def clearInstants: AddBookInstanceToCatalogueState = copy(clockState = ClockState.empty)
-  def clearUUIDs: AddBookInstanceToCatalogueState =
-    copy(uuidGeneratorState = UUIDGeneratorState.empty)
-  def setBooks(books: Map[Book, List[BookInstance]]): AddBookInstanceToCatalogueState =
-    copy(catalogueState = catalogueState.set(books))
-  def setEventPublisherState(
-      events: List[BookInstanceAddedToCatalogue],
-  ): AddBookInstanceToCatalogueState = copy(eventPublisherState = eventPublisherState.set(events))
-  def setInstants(instants: List[Instant]): AddBookInstanceToCatalogueState =
-    copy(clockState = clockState.set(instants))
-  def setUUIDs(uuids: List[UUID]): AddBookInstanceToCatalogueState =
-    copy(uuidGeneratorState = uuidGeneratorState.set(uuids))
-
-object AddBookInstanceToCatalogueState:
-  def empty: AddBookInstanceToCatalogueState = AddBookInstanceToCatalogueState(
-    CatalogueState.empty,
-    ClockState.empty,
-    EventPublisherState.empty[BookInstanceAddedToCatalogue],
-    UUIDGeneratorState.empty,
-  )
-
 object AddBookInstanceToCatalogueRunner:
-  def withState[A](initialState: AddBookInstanceToCatalogueState)(
+  final case class AddBookInstanceToCatalogueState(
+      catalogueState: CatalogueState,
+      clockState: ClockState,
+      eventPublisherState: EventPublisherState[BookInstanceAddedToCatalogue],
+      uuidGeneratorState: UUIDGeneratorState,
+  ):
+    def clearInstants: AddBookInstanceToCatalogueState = copy(clockState = ClockState.empty)
+
+    def clearUUIDs: AddBookInstanceToCatalogueState =
+      copy(uuidGeneratorState = UUIDGeneratorState.empty)
+
+    def setBooks(books: Map[Book, List[BookInstance]]): AddBookInstanceToCatalogueState =
+      copy(catalogueState = catalogueState.set(books))
+
+    def setEvents(events: List[BookInstanceAddedToCatalogue]): AddBookInstanceToCatalogueState =
+      copy(eventPublisherState = eventPublisherState.set(events))
+
+    def setInstants(instants: List[Instant]): AddBookInstanceToCatalogueState =
+      copy(clockState = clockState.set(instants))
+
+    def setUUIDs(uuids: List[UUID]): AddBookInstanceToCatalogueState =
+      copy(uuidGeneratorState = uuidGeneratorState.set(uuids))
+
+  object AddBookInstanceToCatalogueState:
+    def empty: AddBookInstanceToCatalogueState = AddBookInstanceToCatalogueState(
+      CatalogueState.empty,
+      ClockState.empty,
+      EventPublisherState.empty[BookInstanceAddedToCatalogue],
+      UUIDGeneratorState.empty,
+    )
+
+  def runWith[A](initialState: AddBookInstanceToCatalogueState)(
       run: AddBookInstanceToCatalogue => IO[A],
   ): IO[(Either[Throwable, A], AddBookInstanceToCatalogueState)] = for
     catalogueStateRef <- Ref.of[IO, CatalogueState](initialState.catalogueState)

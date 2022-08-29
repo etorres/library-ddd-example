@@ -2,7 +2,7 @@ package es.eriktorr.library
 package catalogue.infrastructure
 
 import book.model.BookInstanceAddedToCatalogue
-import catalogue.model.BookInstanceAddedToCatalogueEventPublisher
+import shared.infrastructure.EventPublisher
 import shared.infrastructure.KafkaClients.KafkaProducerIO
 
 import cats.effect.IO
@@ -13,7 +13,7 @@ final class KafkaBookInstanceAddedToCatalogueEventPublisher(
     producer: KafkaProducerIO[BookInstanceAddedToCatalogue],
     topic: String,
     logger: Logger[IO],
-) extends BookInstanceAddedToCatalogueEventPublisher:
+) extends EventPublisher[BookInstanceAddedToCatalogue]:
   override def publish(event: BookInstanceAddedToCatalogue): IO[Unit] = IO.unit <* producer
     .produce(ProducerRecords.one(ProducerRecord(topic, event.eventId.value, event)))
     .handleErrorWith { case error: Throwable =>

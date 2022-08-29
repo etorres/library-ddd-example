@@ -5,12 +5,12 @@ import book.infrastructure.BookGenerators.{bookGen, bookInstanceGen}
 import book.model.{BookInstance, BookInstanceAddedToCatalogue}
 import catalogue.acceptance.AddBookInstanceToCatalogueSuite.{noBookWithIsbn, thereIsABookWithIsbn}
 import catalogue.application.AddBookInstanceToCatalogue
-import catalogue.infrastructure.{AddBookInstanceToCatalogueRunner, AddBookInstanceToCatalogueState}
+import catalogue.infrastructure.AddBookInstanceToCatalogueRunner
+import catalogue.infrastructure.AddBookInstanceToCatalogueRunner.AddBookInstanceToCatalogueState
 import shared.infrastructure.TimeGenerators.instantArbitrary
 import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
 
 import cats.syntax.either.*
-
 import munit.{CatsEffectSuite, ScalaCheckEffectSuite}
 import org.scalacheck.effect.PropF.forAllF
 
@@ -19,7 +19,7 @@ final class AddBookInstanceToCatalogueSuite extends CatsEffectSuite with ScalaCh
   test("should add a new book instance to the catalogue") {
     forAllF(thereIsABookWithIsbn) { testCase =>
       AddBookInstanceToCatalogueRunner
-        .withState(testCase.initialState)(_.add(testCase.bookInstance))
+        .runWith(testCase.initialState)(_.add(testCase.bookInstance))
         .map { case (result, finalState) =>
           assert(result.isRight)
           assertEquals(finalState, testCase.expectedState)
@@ -30,7 +30,7 @@ final class AddBookInstanceToCatalogueSuite extends CatsEffectSuite with ScalaCh
   test("should not publish any event when adding a new book instance if catalogue fails") {
     forAllF(noBookWithIsbn) { testCase =>
       AddBookInstanceToCatalogueRunner
-        .withState(testCase.initialState)(_.add(testCase.bookInstance))
+        .runWith(testCase.initialState)(_.add(testCase.bookInstance))
         .map { case (result, finalState) =>
           assert(result.isLeft)
           assertEquals(
@@ -60,7 +60,7 @@ object AddBookInstanceToCatalogueSuite:
       .setUUIDs(List(eventId))
     expectedState = initialState.clearInstants.clearUUIDs
       .setBooks(Map(book -> List(bookInstance)))
-      .setEventPublisherState(List(BookInstanceAddedToCatalogue(eventId, when, bookInstance)))
+      .setEvents(List(BookInstanceAddedToCatalogue(eventId, when, bookInstance)))
   yield TestCase(bookInstance, initialState, expectedState)
 
   final private val noBookWithIsbn = for
