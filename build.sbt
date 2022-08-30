@@ -117,12 +117,14 @@ lazy val `commons-kafka` = project
     catsEffect,
     catsEffectKernel,
     ciris,
+    fs2Core,
     fs2Kafka,
     fs2KafkaVulcan,
     schemaRegistryClient,
     vulcan,
   )
   .testDependencies(
+    log4catsCore,
     munit,
     munitCatsEffect,
     munitScalacheck,

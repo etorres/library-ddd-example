@@ -71,7 +71,7 @@ trait Log4cats {
   private[this] val organization = "org.typelevel"
   private[this] val version = "2.4.0"
 
-  val log4catsCore = organization %% "log4cats-core_sjs1" % version
+  val log4catsCore = organization %% "log4cats-core" % version
   val log4catsSlf4j = organization %% "log4cats-slf4j" % version
 }
 

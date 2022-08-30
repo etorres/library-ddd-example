@@ -1,12 +1,14 @@
 package es.eriktorr.library
 package shared.infrastructure
 
-import shared.infrastructure.KafkaConfig.BootstrapServer
-import shared.infrastructure.KafkaConfig.ConsumerGroup
-import shared.infrastructure.KafkaConfig.SchemaRegistry
-import shared.infrastructure.KafkaConfig.Topic
 import shared.infrastructure.KafkaConfig
-import shared.infrastructure.KafkaTestConfig.{testBootstrapServers, testSchemaRegistry, testTopic}
+import shared.infrastructure.KafkaConfig.{BootstrapServer, ConsumerGroup, SchemaRegistry, Topic}
+import shared.infrastructure.KafkaTestConfig.{
+  testBootstrapServers,
+  testConsumerGroupFrom,
+  testSchemaRegistry,
+  testTopicFrom,
+}
 
 import cats.data.NonEmptyList
 
@@ -15,8 +17,8 @@ enum KafkaTestConfig(val kafkaConfig: KafkaConfig):
       extends KafkaTestConfig(
         KafkaConfig(
           KafkaTestConfig.testBootstrapServers,
-          ConsumerGroup.unsafeFrom("library"),
-          KafkaTestConfig.testTopic,
+          KafkaTestConfig.testConsumerGroupFrom("catalogue"),
+          KafkaTestConfig.testTopicFrom("catalogue"),
           KafkaTestConfig.testSchemaRegistry,
         ),
       )
@@ -24,15 +26,19 @@ enum KafkaTestConfig(val kafkaConfig: KafkaConfig):
       extends KafkaTestConfig(
         KafkaConfig(
           KafkaTestConfig.testBootstrapServers,
-          ConsumerGroup.unsafeFrom("library"),
-          KafkaTestConfig.testTopic,
+          KafkaTestConfig.testConsumerGroupFrom("lending"),
+          KafkaTestConfig.testTopicFrom("lending"),
           KafkaTestConfig.testSchemaRegistry,
         ),
       )
 
 object KafkaTestConfig:
-  final private lazy val (testBootstrapServers, testSchemaRegistry, testTopic) = (
-    NonEmptyList.one(BootstrapServer.unsafeFrom("localhost:29092")),
-    SchemaRegistry.unsafeFrom("http://localhost:8081"),
-    Topic.unsafeFrom("library-tests"),
-  )
+  final private lazy val (testBootstrapServers, testSchemaRegistry) =
+    (
+      NonEmptyList.one(BootstrapServer.unsafeFrom("localhost:29092")),
+      SchemaRegistry.unsafeFrom("http://localhost:8081"),
+    )
+  final private def testConsumerGroupFrom(name: String) =
+    ConsumerGroup.unsafeFrom(s"$name-library-test")
+  final private def testTopicFrom(name: String) =
+    Topic.unsafeFrom(s"$name-library-test")

@@ -5,13 +5,15 @@ import book.infrastructure.BookGenerators.bookInstanceAddedToCatalogueGen
 import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
 import book.model.BookInstanceAddedToCatalogue
 import lending.infrastructure.KafkaBookInstanceAddedToCatalogueEventHandler
-import lending.integration.KafkaBookInstanceAddedToCatalogueEventHandlerSuite.bookInstanceAddedToCatalogueAvroCodec
+import lending.integration.KafkaBookInstanceAddedToCatalogueEventHandlerSuite.{bookInstanceAddedToCatalogueAvroCodec, logger}
 import shared.infrastructure.FakeEventHandler.EventHandlerState
 import shared.infrastructure.{KafkaClientsSuite, KafkaTestConfig}
 
 import cats.effect.{IO, Ref}
 import fs2.kafka.{ProducerRecord, ProducerRecords}
 import org.scalacheck.effect.PropF.forAllF
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration.*
 
@@ -34,9 +36,7 @@ final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
         eventHandler = KafkaBookInstanceAddedToCatalogueEventHandler(consumer)
         _ <- eventHandler
           .handleWith(event =>
-            stateRef.update(currentState =>
-              currentState.copy(event :: currentState.events),
-            ),
+            stateRef.update(currentState => currentState.copy(event :: currentState.events)),
           )
           .timeout(30.seconds)
           .take(1)
@@ -48,4 +48,5 @@ final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
   }
 
 object KafkaBookInstanceAddedToCatalogueEventHandlerSuite
-    extends BookInstanceAddedToCatalogueAvroCodec
+    extends BookInstanceAddedToCatalogueAvroCodec:
+  given logger: Logger[IO] = Slf4jLogger.getLogger[IO]

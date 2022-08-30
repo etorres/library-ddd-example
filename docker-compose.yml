@@ -61,7 +61,8 @@ services:
         echo "Waiting for Schema Registry to be ready..."
         cub sr-ready schema-registry 8081 40
         echo "Creating test topics"
-        kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic "library-tests"
+        kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic "catalogue-library-test"
+        kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic "lending-library-test"
         echo "Configured Kafka"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: ignored
