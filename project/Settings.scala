@@ -1,6 +1,7 @@
-import com.typesafe.sbt.SbtNativePackager.Universal
-import com.typesafe.sbt.packager.Keys.maintainer
-import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
+import explicitdeps.ExplicitDepsPlugin.autoImport.{
+  moduleFilterRemoveValue,
+  unusedCompileDependenciesFilter,
+}
 import sbt.Keys._
 import sbt._
 import sbt.nio.Keys.{onChangedBuildSource, ReloadOnSourceChanges}
@@ -85,13 +86,15 @@ object Settings {
       module(s"apps/$path")
         .settings(
           Seq(
-            Universal / maintainer := "https://eriktorr.es",
-            nativeImageOptions += "--no-fallback",
+            nativeImageOptions += "--force-fallback",
+            nativeImageOptions += s"-H:ReflectionConfigurationFiles=${target.value / "native-image-configs" / "reflect-config.json"}",
+            nativeImageOptions += s"-H:ConfigurationFileDirectories=${target.value / "native-image-configs"}",
+            nativeImageOptions += "-H:+JNI",
             nativeImageVersion := "22.2.0",
             nativeImageJvm := "graalvm-java17",
+            unusedCompileDependenciesFilter -= moduleFilter("org.scalameta", "svm-subs"),
           ),
         )
-        .enablePlugins(JavaAppPackaging)
         .enablePlugins(NativeImagePlugin)
 
     def library(path: String): Project = module("libs/" ++ path)
@@ -112,5 +115,12 @@ object Settings {
 
     def testDependencies(dependencies: ModuleID*): Project =
       dependencies_(dependencies.map(_ % Test))
+
+    def unusedCompileDependencies(dependencies: ModuleID*): Project =
+      dependencies_(dependencies).settings(
+        dependencies.map(x =>
+          unusedCompileDependenciesFilter -= moduleFilter(x.organization, x.name),
+        ),
+      )
   }
 }

@@ -32,8 +32,14 @@ object CatalogueApplication extends IOApp:
     CatalogueResources.impl(configuration, runtime.compute).use {
       case CatalogueResources(bookInstanceAddedToCatalogueProducer, jdbcTransactor) =>
         val catalogue = JdbcCatalogue(jdbcTransactor)
-        val bookInstanceAddedToCatalogueEventPublisher = KafkaBookInstanceAddedToCatalogueEventPublisher(bookInstanceAddedToCatalogueProducer, configuration.kafkaConfig.topic.value, logger)
-        val addBookInstanceToCatalogue = AddBookInstanceToCatalogue(catalogue, bookInstanceAddedToCatalogueEventPublisher)
+        val bookInstanceAddedToCatalogueEventPublisher =
+          KafkaBookInstanceAddedToCatalogueEventPublisher(
+            bookInstanceAddedToCatalogueProducer,
+            configuration.kafkaConfig.topic.value,
+            logger,
+          )
+        val addBookInstanceToCatalogue =
+          AddBookInstanceToCatalogue(catalogue, bookInstanceAddedToCatalogueEventPublisher)
         // TODO
         IO.unit
     }

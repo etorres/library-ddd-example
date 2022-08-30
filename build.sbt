@@ -32,7 +32,7 @@ lazy val catalogue = project
     log4catsSlf4j,
     vulcan,
   )
-  .runtimeDependencies(doobiePostgres, log4jApi, log4jCore, log4jSlf4jImpl)
+  .unusedCompileDependencies(doobiePostgres, log4jApi, log4jCore, log4jSlf4jImpl)
   .testDependencies(
     munit,
     munitCatsEffect,
@@ -69,7 +69,7 @@ lazy val lending =
       scopt,
       vulcan,
     )
-    .runtimeDependencies(doobiePostgres, log4jApi, log4jCore, log4jSlf4jImpl)
+    .unusedCompileDependencies(doobiePostgres, log4jApi, log4jCore, log4jSlf4jImpl)
     .testDependencies(
       fs2kafkaVulcanTestkitMunit,
       munit,
