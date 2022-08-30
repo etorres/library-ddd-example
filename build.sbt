@@ -40,7 +40,7 @@ lazy val catalogue = project
     scalacheckEffect,
     scalacheckEffectMunit,
   )
-  .settings(Compile / mainClass := fqClassNameFrom("CatalogueApplication"))
+  .settings(Compile / mainClass := fqClassNameFrom("catalogue.CatalogueApplication"))
 
 lazy val lending =
   project
@@ -78,7 +78,7 @@ lazy val lending =
       scalacheckEffect,
       scalacheckEffectMunit,
     )
-    .settings(Compile / mainClass := fqClassNameFrom("LendingApplication"))
+    .settings(Compile / mainClass := fqClassNameFrom("lending.LendingApplication"))
 
 lazy val `book-model` =
   project

@@ -2,9 +2,15 @@ import com.typesafe.sbt.SbtNativePackager.Universal
 import com.typesafe.sbt.packager.Keys.maintainer
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 import sbt.Keys._
-import sbt.nio.Keys.{onChangedBuildSource, ReloadOnSourceChanges}
 import sbt._
+import sbt.nio.Keys.{onChangedBuildSource, ReloadOnSourceChanges}
 import sbtide.Keys.idePackagePrefix
+import sbtnativeimage.NativeImagePlugin
+import sbtnativeimage.NativeImagePlugin.autoImport.{
+  nativeImageJvm,
+  nativeImageOptions,
+  nativeImageVersion,
+}
 import scalafix.sbt.ScalafixPlugin.autoImport.scalafixSemanticdb
 import wartremover.WartRemover.autoImport.{wartremoverErrors, Wart, Warts}
 
@@ -77,8 +83,16 @@ object Settings {
 
     def application(path: String): Project =
       module(s"apps/$path")
-        .settings(Seq(Universal / maintainer := "https://eriktorr.es"))
+        .settings(
+          Seq(
+            Universal / maintainer := "https://eriktorr.es",
+            nativeImageOptions += "--no-fallback",
+            nativeImageVersion := "22.2.0",
+            nativeImageJvm := "graalvm-java17",
+          ),
+        )
         .enablePlugins(JavaAppPackaging)
+        .enablePlugins(NativeImagePlugin)
 
     def library(path: String): Project = module("libs/" ++ path)
 
