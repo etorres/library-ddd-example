@@ -37,10 +37,10 @@ object KafkaTestClients:
 
       def topicExists() = kafkaAdminClient.listTopics.names.map(_.contains(topic))
       def deleteTopic() =
-        kafkaAdminClient.deleteTopic(topic) *> logger.debug(s"Deleted topic: $topic")
+        kafkaAdminClient.deleteTopic(topic) *> logger.debug(s"Topic deleted: $topic")
       def createTopic() = OnErrorRetry.withBackoff(
         kafkaAdminClient.createTopic(new NewTopic(topic, 1, 1.toShort)) *> logger.debug(
-          s"Created topic: $topic",
+          s"Topic created: $topic",
         ),
         retryConfig,
       ) {
