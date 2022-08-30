@@ -24,12 +24,12 @@ object LendingResources extends BookInstanceAddedToCatalogueAvroCodec:
       executionContext: ExecutionContext,
   ): Resource[IO, LendingResources] =
     for
-      jdbcTransactor <- JdbcTransactor(
-        configuration.jdbcConfig,
-        executionContext,
-      ).transactorResource
       bookInstanceAddedToCatalogueConsumer <- KafkaClients
         .kafkaConsumerUsing[BookInstanceAddedToCatalogue](
           configuration.kafkaConfig,
         )
+      jdbcTransactor <- JdbcTransactor(
+        configuration.jdbcConfig,
+        executionContext,
+      ).transactorResource
     yield LendingResources(bookInstanceAddedToCatalogueConsumer, jdbcTransactor)

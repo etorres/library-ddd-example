@@ -5,7 +5,10 @@ import book.infrastructure.BookGenerators.bookInstanceAddedToCatalogueGen
 import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
 import book.model.BookInstanceAddedToCatalogue
 import lending.infrastructure.KafkaBookInstanceAddedToCatalogueEventHandler
-import lending.integration.KafkaBookInstanceAddedToCatalogueEventHandlerSuite.{bookInstanceAddedToCatalogueAvroCodec, logger}
+import lending.integration.KafkaBookInstanceAddedToCatalogueEventHandlerSuite.{
+  bookInstanceAddedToCatalogueAvroCodec,
+  logger,
+}
 import shared.infrastructure.FakeEventHandler.EventHandlerState
 import shared.infrastructure.{KafkaClientsSuite, KafkaTestConfig}
 

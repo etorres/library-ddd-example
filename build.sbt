@@ -22,17 +22,17 @@ lazy val catalogue = project
     catsEffectKernel,
     catsEffectStd,
     catsFree,
+    ciris,
     doobieCore,
     doobieFree,
     doobieHikari,
-    doobiePostgres,
-    fs2Core,
     fs2Kafka,
     hikariCP,
     log4catsCore,
     log4catsSlf4j,
+    vulcan,
   )
-  .runtimeDependencies(log4jApi, log4jCore, log4jSlf4jImpl)
+  .runtimeDependencies(doobiePostgres, log4jApi, log4jCore, log4jSlf4jImpl)
   .testDependencies(
     munit,
     munitCatsEffect,
@@ -135,7 +135,7 @@ lazy val `commons-kafka` = project
 lazy val `commons-lang` =
   project
     .library("commons-lang")
-    .mainDependencies(catsCore, catsEffect)
+    .mainDependencies(catsCore, catsEffect, catsEffectKernel, catsEffectStd)
     .optionalDependencies(avro, doobieCore, doobiePostgres, vulcan)
     .testDependencies(
       munit,

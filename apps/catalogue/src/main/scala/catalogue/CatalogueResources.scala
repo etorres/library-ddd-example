@@ -1,23 +1,35 @@
 package es.eriktorr.library
 package catalogue
 
+import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
+import book.model.BookInstanceAddedToCatalogue
 import shared.infrastructure.JdbcTransactor
+import shared.infrastructure.KafkaClients
+import shared.infrastructure.KafkaClients.KafkaProducerIO
 
 import cats.effect.{IO, Resource}
 import doobie.Transactor
+import org.typelevel.log4cats.Logger
 
 import scala.concurrent.ExecutionContext
 
-final case class CatalogueResources(jdbcTransactor: Transactor[IO])
+final case class CatalogueResources(
+    bookInstanceAddedToCatalogueProducer: KafkaProducerIO[BookInstanceAddedToCatalogue],
+    jdbcTransactor: Transactor[IO],
+)
 
-object CatalogueResources:
-    def impl(
+object CatalogueResources extends BookInstanceAddedToCatalogueAvroCodec:
+  def impl(
       configuration: CatalogueConfiguration,
       executionContext: ExecutionContext,
-  ): Resource[IO, CatalogueResources] = 
+  ): Resource[IO, CatalogueResources] =
     for
+      bookInstanceAddedToCatalogueProducer <- KafkaClients
+        .kafkaProducerUsing[BookInstanceAddedToCatalogue](
+          configuration.kafkaConfig,
+        )
       jdbcTransactor <- JdbcTransactor(
         configuration.jdbcConfig,
         executionContext,
       ).transactorResource
-    yield CatalogueResources(jdbcTransactor)
+    yield CatalogueResources(bookInstanceAddedToCatalogueProducer, jdbcTransactor)
