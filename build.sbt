@@ -111,6 +111,7 @@ lazy val `commons-jdbc` =
 
 lazy val `commons-kafka` = project
   .library("commons-kafka")
+  .dependsOn(`commons-lang` % "test->test;compile->compile")
   .mainDependencies(
     avro,
     catsCore,

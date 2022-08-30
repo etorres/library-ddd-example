@@ -1,13 +1,18 @@
 package es.eriktorr.library
 package shared.infrastructure
 
+import shared.concurrent.OnErrorRetry
+import shared.concurrent.OnErrorRetry.{RetryConfig, RetryOutcome}
 import shared.infrastructure.KafkaClients.{KafkaConsumerIO, KafkaProducerIO}
 
 import cats.effect.{IO, Resource}
 import fs2.kafka.{AdminClientSettings, KafkaAdminClient}
 import org.apache.kafka.clients.admin.NewTopic
+import org.apache.kafka.common.errors.TopicExistsException
 import org.typelevel.log4cats.Logger
 import vulcan.Codec
+
+import scala.concurrent.duration.*
 
 object KafkaTestClients:
   def kafkaTestClientsUsing[A](
@@ -21,16 +26,29 @@ object KafkaTestClients:
         AdminClientSettings(kafkaTestConfig.kafkaConfig.bootstrapServersAsString),
       )
     _ <- Resource.make {
-      for
-        topicNames <- kafkaAdminClient.listTopics.names
-        _ <- logger.debug(s"Kafka topics: ${topicNames.mkString(", ")}")
-//        _ <- kafkaAdminClient.deleteTopic(kafkaTestConfig.kafkaConfig.topic.value)
-//        // TODO: polling until deleted
-//        _ <- kafkaAdminClient.createTopic(
-//          NewTopic(kafkaTestConfig.kafkaConfig.topic.value, 1, 1.toShort),
-//        )
-//        // TODO: polling until created
-      yield ()
+      val retryConfig = RetryConfig(
+        maxRetries = 10,
+        initialDelay = 10.millis,
+        maxDelay = 2.seconds,
+        backoffFactor = 1.5,
+      )
+
+      lazy val topic: String = kafkaTestConfig.kafkaConfig.topic.value
+
+      def topicExists() = kafkaAdminClient.listTopics.names.map(_.contains(topic))
+      def deleteTopic() =
+        kafkaAdminClient.deleteTopic(topic) *> logger.debug(s"Deleted topic: $topic")
+      def createTopic() = OnErrorRetry.withBackoff(
+        kafkaAdminClient.createTopic(new NewTopic(topic, 1, 1.toShort)) *> logger.debug(
+          s"Created topic: $topic",
+        ),
+        retryConfig,
+      ) {
+        case _: TopicExistsException => IO.pure(RetryOutcome.Next)
+        case e => logger.error(e)("Unexpected error, giving up").as(RetryOutcome.Raise)
+      }
+
+      topicExists().ifM(ifTrue = deleteTopic() *> createTopic(), ifFalse = IO.unit)
     }(_ => IO.unit)
     kafkaClients <- KafkaClients.kafkaClientsUsing[A](kafkaTestConfig.kafkaConfig)
   yield kafkaClients
