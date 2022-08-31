@@ -3,7 +3,8 @@ package lending.infrastructure
 
 import book.infrastructure.BookInstanceGenerators.bookIdGen
 import book.model.BookType
-import lending.model.{AvailableBook, LibraryBranchId}
+import lending.model.Book.AvailableBook
+import lending.model.LibraryBranchId
 
 import org.scalacheck.Gen
 

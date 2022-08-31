@@ -22,7 +22,7 @@ enum JdbcTestConfig(val jdbcConfig: JdbcConfig, val schema: NonEmptyString):
         ),
         NonEmptyString.unsafeFrom("test_catalogue"),
       )
-  case AvailableBooksForLending
+  case Lending
       extends JdbcTestConfig(
         JdbcConfig(
           JdbcTestConfig.postgresqlDriverClassName,
@@ -30,7 +30,7 @@ enum JdbcTestConfig(val jdbcConfig: JdbcConfig, val schema: NonEmptyString):
           JdbcTestConfig.testUser("lending"),
           JdbcTestConfig.testPassword,
         ),
-        NonEmptyString.unsafeFrom("test_available_books"),
+        NonEmptyString.unsafeFrom("test_lending"),
       )
 
 object JdbcTestConfig:

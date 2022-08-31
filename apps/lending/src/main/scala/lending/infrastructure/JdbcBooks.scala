@@ -23,7 +23,7 @@ final class JdbcBooks(transactor: Transactor[IO])
     with BookTypeJdbcMapping
     with LibraryBranchIdJdbcMapping
     with PatronIdJdbcMapping:
-  override def add(book: Book): IO[Unit] = book match
+  override def save(book: Book): IO[Unit] = book match
     case AvailableBook(bookId, bookType, libraryBranchId) =>
       IO.unit <* sql"""
         INSERT INTO books (

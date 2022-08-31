@@ -8,7 +8,7 @@ import shared.infrastructure.EventHandler
 import cats.effect.IO
 import fs2.Stream
 
-final class ReactToChangeOnBookHolding(
+final class ReactToChangeOnBookState(
     books: Books,
     bookPlacedOnHoldEventHandler: EventHandler[BookPlacedOnHold],
     bookCheckedOutEventHandler: EventHandler[BookCheckedOut],

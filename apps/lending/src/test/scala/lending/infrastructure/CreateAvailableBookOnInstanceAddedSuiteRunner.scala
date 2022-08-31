@@ -3,9 +3,9 @@ package lending.infrastructure
 
 import book.model.BookInstanceAddedToCatalogue
 import lending.application.CreateAvailableBookOnInstanceAdded
-import lending.infrastructure.FakeAvailableBooks
-import lending.infrastructure.FakeAvailableBooks.AvailableBooksState
-import lending.model.{AvailableBook, LibraryBranchId}
+import lending.infrastructure.FakeBooks
+import lending.infrastructure.FakeBooks.BooksState
+import lending.model.{Book, LibraryBranchId}
 import shared.infrastructure.FakeEventHandler
 import shared.infrastructure.FakeEventHandler.EventHandlerState
 
@@ -13,16 +13,14 @@ import cats.effect.{IO, Ref}
 
 object CreateAvailableBookOnInstanceAddedSuiteRunner:
   final case class CreateAvailableBookOnInstanceAddedState(
-      availableBooksState: AvailableBooksState,
+      booksState: BooksState,
       eventHandlerState: EventHandlerState[BookInstanceAddedToCatalogue],
       libraryBranchId: LibraryBranchId,
   ):
     def clearEvents: CreateAvailableBookOnInstanceAddedState =
       copy(eventHandlerState = EventHandlerState.empty)
-    def setAvailableBooks(
-        availableBooks: List[AvailableBook],
-    ): CreateAvailableBookOnInstanceAddedState =
-      copy(availableBooksState = availableBooksState.set(availableBooks))
+    def setBooks(books: List[Book]): CreateAvailableBookOnInstanceAddedState =
+      copy(booksState = booksState.set(books))
     def setEvents(
         events: List[BookInstanceAddedToCatalogue],
     ): CreateAvailableBookOnInstanceAddedState =
@@ -31,7 +29,7 @@ object CreateAvailableBookOnInstanceAddedSuiteRunner:
   object CreateAvailableBookOnInstanceAddedState:
     def from(libraryBranchId: LibraryBranchId): CreateAvailableBookOnInstanceAddedState =
       CreateAvailableBookOnInstanceAddedState(
-        AvailableBooksState.empty,
+        BooksState.empty,
         EventHandlerState.empty,
         libraryBranchId,
       )
@@ -41,22 +39,22 @@ object CreateAvailableBookOnInstanceAddedSuiteRunner:
   )(
       run: CreateAvailableBookOnInstanceAdded => IO[A],
   ): IO[(Either[Throwable, A], CreateAvailableBookOnInstanceAddedState)] = for
-    availableBooksStateRef <- Ref.of[IO, AvailableBooksState](initialState.availableBooksState)
+    booksStateRef <- Ref.of[IO, BooksState](initialState.booksState)
     eventHandlerStateRef <- Ref.of[IO, EventHandlerState[BookInstanceAddedToCatalogue]](
       initialState.eventHandlerState,
     )
-    availableBooks = FakeAvailableBooks(availableBooksStateRef)
+    books = FakeBooks(booksStateRef)
     eventHandler = FakeEventHandler(eventHandlerStateRef)
     createAvailableBookOnInstanceAdded = CreateAvailableBookOnInstanceAdded(
-      availableBooks,
+      books,
       eventHandler,
       initialState.libraryBranchId,
     )
     result <- run(createAvailableBookOnInstanceAdded).attempt
-    finalAvailableBooksState <- availableBooksStateRef.get
+    finalBooksState <- booksStateRef.get
     finalEventHandlerState <- eventHandlerStateRef.get
     finalState = initialState.copy(
-      availableBooksState = finalAvailableBooksState,
+      booksState = finalBooksState,
       eventHandlerState = finalEventHandlerState,
     )
   yield (result, finalState)
