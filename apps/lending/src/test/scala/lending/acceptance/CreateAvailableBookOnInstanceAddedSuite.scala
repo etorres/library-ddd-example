@@ -7,7 +7,7 @@ import lending.acceptance.CreateAvailableBookOnInstanceAddedSuite.testCaseGen
 import lending.infrastructure.CreateAvailableBookOnInstanceAddedSuiteRunner
 import lending.infrastructure.CreateAvailableBookOnInstanceAddedSuiteRunner.CreateAvailableBookOnInstanceAddedState
 import lending.infrastructure.LendingGenerators.libraryBranchIdGen
-import lending.model.Book
+import lending.model.Book.AvailableBook
 
 import munit.{CatsEffectSuite, ScalaCheckEffectSuite}
 import org.scalacheck.effect.PropF.forAllF
@@ -44,6 +44,6 @@ object CreateAvailableBookOnInstanceAddedSuite:
       .from(libraryBranchId)
       .setEvents(List(bookInstanceAddedToCatalogue))
     expectedState = initialState.clearEvents.setBooks(
-      List(Book.availableBookFrom(bookInstanceAddedToCatalogue.bookInstance, libraryBranchId)),
+      List(AvailableBook.from(bookInstanceAddedToCatalogue.bookInstance, libraryBranchId)),
     )
   yield TestCase(initialState, expectedState)

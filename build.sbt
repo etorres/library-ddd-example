@@ -59,6 +59,7 @@ lazy val lending =
       catsEffectKernel,
       catsEffectStd,
       catsFree,
+      catsKernel,
       ciris,
       doobieCore,
       doobieFree,
@@ -88,7 +89,7 @@ lazy val `book-instance` =
     .library("book-instance")
     .dependsOn(`commons-lang` % "test->test;compile->compile")
     .mainDependencies(catsCore)
-    .optionalDependencies(avro, catsFree, doobieCore, doobiePostgres, vulcan)
+    .optionalDependencies(avro, catsFree, doobieCore, doobiePostgres, typename, vulcan)
     .testDependencies(log4jApi, log4jCore, log4jSlf4jImpl, munit, scalacheck)
 
 lazy val `commons-jdbc` =

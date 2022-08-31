@@ -3,10 +3,12 @@ package lending.infrastructure
 
 import book.infrastructure.{BookIdJdbcMapping, BookTypeJdbcMapping}
 import book.model.{BookId, BookType}
+import lending.infrastructure.JdbcBooks.RawBook
 import lending.infrastructure.LibraryBranchIdJdbcMapping
 import lending.model.*
 import lending.model.Book.{AvailableBook, BookOnHold, CheckedOutBook}
 import lending.model.BookState.{Available, CheckedOut, OnHold}
+import shared.validated.ValidatedIO.validatedNecIO
 
 import cats.effect.IO
 import doobie.Transactor
@@ -24,8 +26,7 @@ final class JdbcBooks(transactor: Transactor[IO])
     with LibraryBranchIdJdbcMapping
     with PatronIdJdbcMapping:
   override def save(book: Book): IO[Unit] = book match
-    case AvailableBook(bookId, bookType, libraryBranchId) =>
-      IO.unit <* sql"""
+    case AvailableBook(bookId, bookType, libraryBranchId) => IO.unit <* sql"""
         INSERT INTO books (
           book_id, 
           book_type, 
@@ -39,7 +40,6 @@ final class JdbcBooks(transactor: Transactor[IO])
         )""".stripMargin.update.run.transact(transactor)
     case _ => IO.unit
 
-  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
   override def findBy(bookId: BookId): IO[Option[Book]] = sql"""
       SELECT
         book_id, 
@@ -52,83 +52,45 @@ final class JdbcBooks(transactor: Transactor[IO])
         checked_out_by_patron,
         on_hold_till
       FROM books
-      WHERE book_id = $bookId"""
-    .query[
-      (
-          BookId,
-          BookType,
-          BookState,
-          Option[LibraryBranchId],
-          Option[LibraryBranchId],
-          Option[PatronId],
-          Option[LibraryBranchId],
-          Option[PatronId],
-          Option[Instant],
-      ),
-    ]
+      WHERE book_id = $bookId""".stripMargin
+    .query[RawBook]
     .option
     .transact(transactor)
-    .map {
-      case Some(
-            (
-              bookId,
-              bookType,
-              bookState,
-              availableAtBranch,
-              onHoldAtBranch,
-              onHoldByPatron,
-              checkedOutAtBranch,
-              checkedOutByPatron,
-              onHoldTill,
-            ),
-          ) =>
-        bookState match
+    .flatMap {
+      case Some(rawBook) =>
+        (rawBook.bookState match
           case Available =>
-            Some(
-              AvailableBook(
-                bookId,
-                bookType,
-                availableAtBranch.getOrElse(
-                  throw IllegalStateException(
-                    s"Missing library branch Id for available book: $bookId",
-                  ),
-                ),
-              ),
-            )
+            AvailableBook.from(rawBook.bookId, rawBook.bookType, rawBook.availableAtBranch)
           case CheckedOut =>
-            Some(
-              CheckedOutBook(
-                bookId,
-                bookType,
-                checkedOutAtBranch.getOrElse(
-                  throw IllegalStateException(
-                    s"Missing library branch for book on hold: $bookId",
-                  ),
-                ),
-                checkedOutByPatron.getOrElse(
-                  throw IllegalStateException(
-                    s"Missing patron for book on hold: $bookId",
-                  ),
-                ),
-              ),
-            )
+            CheckedOutBook
+              .from(
+                rawBook.bookId,
+                rawBook.bookType,
+                rawBook.checkedOutAtBranch,
+                rawBook.checkedOutByPatron,
+              )
           case OnHold =>
-            Some(
-              BookOnHold(
-                bookId,
-                bookType,
-                onHoldAtBranch.getOrElse(
-                  throw IllegalStateException(
-                    s"Missing library branch for book on hold: $bookId",
-                  ),
-                ),
-                onHoldByPatron.getOrElse(
-                  throw IllegalStateException(
-                    s"Missing patron for book on hold: $bookId",
-                  ),
-                ),
-                onHoldTill,
-              ),
-            )
-      case None => None
+            BookOnHold
+              .from(
+                rawBook.bookId,
+                rawBook.bookType,
+                rawBook.onHoldAtBranch,
+                rawBook.onHoldByPatron,
+                rawBook.onHoldTill,
+              )
+        ).validated.map(Some.apply)
+      case None => IO.pure(None)
     }
+
+object JdbcBooks:
+  final case class RawBook(
+      bookId: BookId,
+      bookType: BookType,
+      bookState: BookState,
+      availableAtBranch: Option[LibraryBranchId],
+      onHoldAtBranch: Option[LibraryBranchId],
+      onHoldByPatron: Option[PatronId],
+      checkedOutAtBranch: Option[LibraryBranchId],
+      checkedOutByPatron: Option[PatronId],
+      onHoldTill: Option[Instant],
+  )
