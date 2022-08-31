@@ -3,8 +3,7 @@ package catalogue.infrastructure
 
 import catalogue.model.Author
 
-import doobie.{Put, Read}
+import doobie.Meta
 
 trait AuthorJdbcMapping:
-  implicit val authorPut: Put[Author] = Put[String].contramap(_.value)
-  implicit val authorRead: Read[Author] = Read[String].map(Author.unsafeFrom)
+  implicit val authorMeta: Meta[Author] = Meta[String].timap(Author.unsafeFrom)(_.value)

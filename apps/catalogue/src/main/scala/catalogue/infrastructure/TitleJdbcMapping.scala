@@ -3,8 +3,7 @@ package catalogue.infrastructure
 
 import catalogue.model.Title
 
-import doobie.{Put, Read}
+import doobie.Meta
 
 trait TitleJdbcMapping:
-  implicit val titlePut: Put[Title] = Put[String].contramap(_.value)
-  implicit val titleRead: Read[Title] = Read[String].map(Title.unsafeFrom)
+  implicit val titleMeta: Meta[Title] = Meta[String].timap(Title.unsafeFrom)(_.value)

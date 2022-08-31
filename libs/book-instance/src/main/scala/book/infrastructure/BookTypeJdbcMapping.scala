@@ -3,8 +3,7 @@ package book.infrastructure
 
 import book.model.BookType
 
-import doobie.{Put, Read}
+import doobie.Meta
 
 trait BookTypeJdbcMapping:
-  implicit val bookTypePut: Put[BookType] = Put[String].contramap(_.toString)
-  implicit val bookTypeRead: Read[BookType] = Read[String].map(BookType.valueOf)
+  implicit val bookTypeMeta: Meta[BookType] = Meta[String].timap(BookType.valueOf)(_.toString)

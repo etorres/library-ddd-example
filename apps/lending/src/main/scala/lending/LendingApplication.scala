@@ -2,7 +2,7 @@ package es.eriktorr.library
 package lending
 
 import lending.application.CreateAvailableBookOnInstanceAdded
-import lending.infrastructure.{JdbcAvailableBooks, KafkaBookInstanceAddedToCatalogueEventHandler}
+import lending.infrastructure.{JdbcBooks, KafkaBookInstanceAddedToCatalogueEventHandler}
 
 import cats.effect.std.Console
 import cats.effect.{ExitCode, IO, IOApp}
@@ -31,12 +31,12 @@ object LendingApplication extends IOApp:
   ): IO[Unit] =
     LendingResources.impl(configuration, runtime.compute).use {
       case LendingResources(bookInstanceAddedToCatalogueConsumer, jdbcTransactor) =>
-        val availableBooks = JdbcAvailableBooks(jdbcTransactor)
+        val books = JdbcBooks(jdbcTransactor)
         val bookInstanceAddedToCatalogueEventHandler =
           KafkaBookInstanceAddedToCatalogueEventHandler(bookInstanceAddedToCatalogueConsumer)
         val createAvailableBookOnInstanceAdded =
           CreateAvailableBookOnInstanceAdded(
-            availableBooks,
+            books,
             bookInstanceAddedToCatalogueEventHandler,
             parameters.libraryBranchId,
           )

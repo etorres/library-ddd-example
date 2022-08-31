@@ -31,6 +31,7 @@ lazy val catalogue = project
     hikariCP,
     log4catsCore,
     log4catsSlf4j,
+    typename,
     vulcan,
   )
   .unusedCompileDependencies(doobiePostgres, log4jApi, log4jCore, log4jSlf4jImpl)
@@ -67,6 +68,7 @@ lazy val lending =
       hikariCP,
       log4catsCore,
       log4catsSlf4j,
+      typename,
       scopt,
       vulcan,
     )

@@ -3,8 +3,7 @@ package book.infrastructure
 
 import book.model.ISBN
 
-import doobie.{Put, Read}
+import doobie.Meta
 
 trait ISBNJdbcMapping:
-  implicit val isbnPut: Put[ISBN] = Put[String].contramap(_.value)
-  implicit val isbnRead: Read[ISBN] = Read[String].map(ISBN.unsafeFrom)
+  implicit val isbnMeta: Meta[ISBN] = Meta[String].timap(ISBN.unsafeFrom)(_.value)

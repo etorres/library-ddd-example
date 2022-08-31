@@ -15,7 +15,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
       FOREACH schema_name IN ARRAY schema_names
       LOOP
         EXECUTE 'CREATE SCHEMA IF NOT EXISTS ' || quote_ident(schema_name);
-        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || quote_ident(schema_name) || '.available_books (
+        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || quote_ident(schema_name) || '.books (
           book_id UUID PRIMARY KEY,
           book_type VARCHAR(32) NOT NULL,
           book_state VARCHAR(32) NOT NULL,

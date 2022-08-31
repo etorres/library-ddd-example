@@ -120,6 +120,13 @@ trait Scopt {
   val scopt = organization %% "scopt" % version
 }
 
+trait TypeName {
+  private[this] val organization = "org.tpolecat"
+  private[this] val version = "1.0.0"
+
+  val typename = organization %% "typename" % version
+}
+
 trait Vulcan {
   private[this] val organization = "com.github.fd4s"
 
@@ -142,4 +149,5 @@ object Dependencies
     with ScalaCheck
     with SchemaRegistry
     with Scopt
+    with TypeName
     with Vulcan

@@ -3,12 +3,11 @@ package book.infrastructure
 
 import book.model.BookId
 
+import doobie.Meta
 import doobie.postgres.*
 import doobie.postgres.implicits.*
-import doobie.{Put, Read}
 
 import java.util.UUID
 
 trait BookIdJdbcMapping:
-  implicit val bookIdPut: Put[BookId] = Put[UUID].contramap(_.value)
-  implicit val bookIdRead: Read[BookId] = Read[UUID].map(BookId.from)
+  implicit val bookIdMeta: Meta[BookId] = Meta[UUID].timap(BookId.from)(_.value)

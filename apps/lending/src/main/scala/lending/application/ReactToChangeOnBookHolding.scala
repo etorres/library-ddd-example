@@ -1,28 +1,31 @@
 package es.eriktorr.library
 package lending.application
 
-import lending.model.AvailableBooks
 import lending.model.BookEvent.*
+import lending.model.Books
 import shared.infrastructure.EventHandler
 
 import cats.effect.IO
 import fs2.Stream
 
 final class ReactToChangeOnBookHolding(
-    availableBooks: AvailableBooks,
+    books: Books,
     bookPlacedOnHoldEventHandler: EventHandler[BookPlacedOnHold],
     bookCheckedOutEventHandler: EventHandler[BookCheckedOut],
     bookHoldExpiredEventHandler: EventHandler[BookHoldExpired],
     bookHoldCanceledEventHandler: EventHandler[BookHoldCanceled],
     bookReturnedEventHandler: EventHandler[BookReturned],
 ):
-  def handleBookPlacedOnHold: Stream[IO, Unit] = for _ <- bookPlacedOnHoldEventHandler.handleWith {
-      event =>
+  def handleBookPlacedOnHold: Stream[IO, Unit] = bookPlacedOnHoldEventHandler.handleWith { event =>
+    for
+      book <- books.findBy(event.bookId)
+      _ <- book.fold(IO.unit) {
         ???
         ???
         ???
-    }
-  yield ()
+      }
+    yield ()
+  }
 
   /*
   @EventListener
