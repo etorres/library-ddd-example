@@ -1,9 +1,9 @@
 package es.eriktorr.library
 package catalogue.infrastructure
 
-import book.model.{Book, BookInstance, ISBN}
+import book.model.{BookInstance, ISBN}
 import catalogue.infrastructure.FakeCatalogue.CatalogueState
-import catalogue.model.Catalogue
+import catalogue.model.{Book, Catalogue}
 
 import cats.effect.{IO, Ref}
 

@@ -1,14 +1,15 @@
 package es.eriktorr.library
 package catalogue.acceptance
 
-import book.infrastructure.BookGenerators.{bookGen, bookInstanceGen}
+import book.infrastructure.BookInstanceGenerators.bookInstanceGen
 import book.model.{BookInstance, BookInstanceAddedToCatalogue}
 import catalogue.acceptance.AddBookInstanceToCatalogueSuite.{noBookWithIsbn, thereIsABookWithIsbn}
 import catalogue.application.AddBookInstanceToCatalogue
 import catalogue.infrastructure.AddBookInstanceToCatalogueSuiteRunner
 import catalogue.infrastructure.AddBookInstanceToCatalogueSuiteRunner.AddBookInstanceToCatalogueState
+import catalogue.infrastructure.CatalogueGenerators.bookGen
 import shared.infrastructure.TimeGenerators.instantArbitrary
-import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
+import shared.refined.types.infrastructure.RefinedTypesGenerators.eventIdGen
 
 import cats.syntax.either.*
 import munit.{CatsEffectSuite, ScalaCheckEffectSuite}
@@ -52,12 +53,12 @@ object AddBookInstanceToCatalogueSuite:
   final private val thereIsABookWithIsbn = for
     book <- bookGen
     bookInstance <- bookInstanceGen(book.isbn)
-    eventId <- uuidGen
+    eventId <- eventIdGen
     when <- instantArbitrary.arbitrary
     initialState = AddBookInstanceToCatalogueState.empty
       .setBooks(Map(book -> List.empty))
       .setInstants(List(when))
-      .setUUIDs(List(eventId))
+      .setUUIDs(List(eventId.value))
     expectedState = initialState.clearInstants.clearUUIDs
       .setBooks(Map(book -> List(bookInstance)))
       .setEvents(List(BookInstanceAddedToCatalogue(eventId, when, bookInstance)))

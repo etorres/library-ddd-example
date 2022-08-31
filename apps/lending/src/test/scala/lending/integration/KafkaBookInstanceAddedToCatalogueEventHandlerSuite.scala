@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package lending.integration
 
-import book.infrastructure.BookGenerators.bookInstanceAddedToCatalogueGen
+import book.infrastructure.BookInstanceGenerators.bookInstanceAddedToCatalogueGen
 import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
 import book.model.BookInstanceAddedToCatalogue
 import lending.infrastructure.KafkaBookInstanceAddedToCatalogueEventHandler
@@ -33,7 +33,7 @@ final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
         )
         _ <- producer.produce(
           ProducerRecords.one(
-            ProducerRecord(kafkaTestConfig.kafkaConfig.topic.value, event.eventId.value, event),
+            ProducerRecord(kafkaTestConfig.kafkaConfig.topic.value, event.eventId.asString, event),
           ),
         )
         eventHandler = KafkaBookInstanceAddedToCatalogueEventHandler(consumer)

@@ -15,7 +15,7 @@ final class KafkaBookInstanceAddedToCatalogueEventPublisher(
     logger: Logger[IO],
 ) extends EventPublisher[BookInstanceAddedToCatalogue]:
   override def publish(event: BookInstanceAddedToCatalogue): IO[Unit] = IO.unit <* producer
-    .produce(ProducerRecords.one(ProducerRecord(topic, event.eventId.value, event)))
+    .produce(ProducerRecords.one(ProducerRecord(topic, event.eventId.asString, event)))
     .handleErrorWith { case error: Throwable =>
       logger.error(error)("The event could not be published") *> IO.raiseError(error)
     }

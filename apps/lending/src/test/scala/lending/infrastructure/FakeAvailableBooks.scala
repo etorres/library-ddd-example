@@ -1,9 +1,9 @@
 package es.eriktorr.library
 package lending.infrastructure
 
+import book.model.BookId
 import lending.infrastructure.FakeAvailableBooks.AvailableBooksState
 import lending.model.{AvailableBook, AvailableBooks}
-import shared.refined.types.UUID
 
 import cats.effect.{IO, Ref}
 
@@ -11,7 +11,7 @@ final class FakeAvailableBooks(stateRef: Ref[IO, AvailableBooksState]) extends A
   override def add(availableBook: AvailableBook): IO[Unit] =
     stateRef.update(currentState => currentState.copy(availableBook :: currentState.availableBooks))
 
-  override def findBy(bookId: UUID): IO[Option[AvailableBook]] =
+  override def findBy(bookId: BookId): IO[Option[AvailableBook]] =
     stateRef.get.map(_.availableBooks.find(_.bookId == bookId))
 
 object FakeAvailableBooks:

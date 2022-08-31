@@ -6,12 +6,12 @@ sbtSettings
 lazy val `library-ddd-example` =
   project
     .root("library-ddd-example")
-    .aggregate(`book-model`, catalogue, `commons-jdbc`, `commons-kafka`, `commons-lang`, lending)
+    .aggregate(`book-instance`, catalogue, `commons-jdbc`, `commons-kafka`, `commons-lang`, lending)
 
 lazy val catalogue = project
   .application("catalogue")
   .dependsOn(
-    `book-model` % "test->test;compile->compile",
+    `book-instance` % "test->test;compile->compile",
     `commons-jdbc` % "test->test;compile->compile",
     `commons-kafka` % "test->test;compile->compile",
     `commons-lang` % "test->test;compile->compile",
@@ -22,6 +22,7 @@ lazy val catalogue = project
     catsEffectKernel,
     catsEffectStd,
     catsFree,
+    catsKernel,
     ciris,
     doobieCore,
     doobieFree,
@@ -46,7 +47,7 @@ lazy val lending =
   project
     .application("lending")
     .dependsOn(
-      `book-model` % "test->test;compile->compile",
+      `book-instance` % "test->test;compile->compile",
       `commons-jdbc` % "test->test;compile->compile",
       `commons-kafka` % "test->test;compile->compile",
       `commons-lang` % "test->test;compile->compile",
@@ -80,12 +81,12 @@ lazy val lending =
     )
     .settings(Compile / mainClass := fqClassNameFrom("lending.LendingApplication"))
 
-lazy val `book-model` =
+lazy val `book-instance` =
   project
-    .library("book-model")
+    .library("book-instance")
     .dependsOn(`commons-lang` % "test->test;compile->compile")
-    .mainDependencies(catsCore, catsKernel)
-    .optionalDependencies(avro, catsFree, doobieCore, vulcan)
+    .mainDependencies(catsCore)
+    .optionalDependencies(avro, catsFree, doobieCore, doobiePostgres, vulcan)
     .testDependencies(log4jApi, log4jCore, log4jSlf4jImpl, munit, scalacheck)
 
 lazy val `commons-jdbc` =
@@ -136,8 +137,8 @@ lazy val `commons-kafka` = project
 lazy val `commons-lang` =
   project
     .library("commons-lang")
-    .mainDependencies(catsCore, catsEffect, catsEffectKernel, catsEffectStd)
-    .optionalDependencies(avro, doobieCore, doobiePostgres, vulcan)
+    .mainDependencies(catsCore, catsEffect, catsEffectKernel)
+    .optionalDependencies(avro, vulcan)
     .testDependencies(
       munit,
       munitCatsEffect,

@@ -1,13 +1,13 @@
 package es.eriktorr.library
 package lending.acceptance
 
-import book.infrastructure.BookGenerators.bookInstanceAddedToCatalogueGen
+import book.infrastructure.BookInstanceGenerators.bookInstanceAddedToCatalogueGen
 import book.model.BookInstanceAddedToCatalogue
 import lending.acceptance.CreateAvailableBookOnInstanceAddedSuite.testCaseGen
 import lending.infrastructure.CreateAvailableBookOnInstanceAddedSuiteRunner
 import lending.infrastructure.CreateAvailableBookOnInstanceAddedSuiteRunner.CreateAvailableBookOnInstanceAddedState
+import lending.infrastructure.LendingGenerators.libraryBranchIdGen
 import lending.model.AvailableBook
-import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
 
 import munit.{CatsEffectSuite, ScalaCheckEffectSuite}
 import org.scalacheck.effect.PropF.forAllF
@@ -39,7 +39,7 @@ object CreateAvailableBookOnInstanceAddedSuite:
 
   final private val testCaseGen = for
     bookInstanceAddedToCatalogue <- bookInstanceAddedToCatalogueGen
-    libraryBranchId <- uuidGen
+    libraryBranchId <- libraryBranchIdGen
     initialState = CreateAvailableBookOnInstanceAddedState
       .from(libraryBranchId)
       .setEvents(List(bookInstanceAddedToCatalogue))

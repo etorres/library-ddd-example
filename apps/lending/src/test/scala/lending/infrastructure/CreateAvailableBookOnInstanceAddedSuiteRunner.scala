@@ -5,10 +5,9 @@ import book.model.BookInstanceAddedToCatalogue
 import lending.application.CreateAvailableBookOnInstanceAdded
 import lending.infrastructure.FakeAvailableBooks
 import lending.infrastructure.FakeAvailableBooks.AvailableBooksState
-import lending.model.AvailableBook
+import lending.model.{AvailableBook, LibraryBranchId}
 import shared.infrastructure.FakeEventHandler
 import shared.infrastructure.FakeEventHandler.EventHandlerState
-import shared.refined.types.UUID
 
 import cats.effect.{IO, Ref}
 
@@ -16,7 +15,7 @@ object CreateAvailableBookOnInstanceAddedSuiteRunner:
   final case class CreateAvailableBookOnInstanceAddedState(
       availableBooksState: AvailableBooksState,
       eventHandlerState: EventHandlerState[BookInstanceAddedToCatalogue],
-      libraryBranchId: UUID,
+      libraryBranchId: LibraryBranchId,
   ):
     def clearEvents: CreateAvailableBookOnInstanceAddedState =
       copy(eventHandlerState = EventHandlerState.empty)
@@ -30,7 +29,7 @@ object CreateAvailableBookOnInstanceAddedSuiteRunner:
       copy(eventHandlerState = eventHandlerState.set(events))
 
   object CreateAvailableBookOnInstanceAddedState:
-    def from(libraryBranchId: UUID): CreateAvailableBookOnInstanceAddedState =
+    def from(libraryBranchId: LibraryBranchId): CreateAvailableBookOnInstanceAddedState =
       CreateAvailableBookOnInstanceAddedState(
         AvailableBooksState.empty,
         EventHandlerState.empty,

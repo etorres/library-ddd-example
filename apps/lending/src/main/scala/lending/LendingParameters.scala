@@ -1,21 +1,21 @@
 package es.eriktorr.library
 package lending
 
+import lending.model.LibraryBranchId
 import shared.ValidationErrors
-import shared.refined.types.UUID
 
 import cats.data.Validated
 
-final case class LendingParameters(libraryBranchId: UUID):
+final case class LendingParameters(libraryBranchId: LibraryBranchId):
   def asString: String = s"library-branch-id=$libraryBranchId"
 
 object LendingParameters:
   import scopt.OParser
 
   @SuppressWarnings(Array("org.wartremover.warts.Throw"))
-  implicit private val uuidRead: scopt.Read[UUID] =
+  implicit private val libraryBranchIdRead: scopt.Read[LibraryBranchId] =
     scopt.Read.reads(x =>
-      UUID.from(x) match
+      LibraryBranchId.from(x) match
         case Validated.Valid(value) => value
         case Validated.Invalid(errors) =>
           throw IllegalArgumentException(s"'$x' is not a UUID.", ValidationErrors(errors)),
@@ -25,20 +25,20 @@ object LendingParameters:
   private[this] val argParser =
     import builder.*
     OParser.sequence(
-      programName("book-lending-library"),
-      head("book-lending-library", "1.x"),
-      opt[UUID]('b', "branch")
+      programName("lending"),
+      head("lending", "1.x"),
+      opt[LibraryBranchId]('b', "branch")
         .required()
         .valueName("<uuid>")
         .action((x, c) => c.copy(libraryBranchId = x))
         .text("branch is a required UUID property")
         .validate(x =>
-          if x != UUID.nil then success else failure("Option --branch must be not nil"),
+          if x != LibraryBranchId.nil then success else failure("Option --branch must be not nil"),
         ),
       help("help").text("prints this usage text"),
     )
 
   def from(args: List[String]): Option[LendingParameters] =
-    OParser.parse(argParser, args, LendingParameters(UUID.nil))
+    OParser.parse(argParser, args, LendingParameters(LibraryBranchId.nil))
 
   def usage: String = OParser.usage(argParser)

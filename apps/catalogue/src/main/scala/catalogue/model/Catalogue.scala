@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package catalogue.model
 
-import book.model.{Book, BookInstance, ISBN}
+import book.model.{BookInstance, ISBN}
 
 import cats.effect.IO
 

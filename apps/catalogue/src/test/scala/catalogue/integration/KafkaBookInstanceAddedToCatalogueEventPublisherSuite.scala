@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package catalogue.integration
 
-import book.infrastructure.BookGenerators.bookInstanceAddedToCatalogueGen
+import book.infrastructure.BookInstanceGenerators.bookInstanceAddedToCatalogueGen
 import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
 import book.model.BookInstanceAddedToCatalogue
 import catalogue.infrastructure.KafkaBookInstanceAddedToCatalogueEventPublisher

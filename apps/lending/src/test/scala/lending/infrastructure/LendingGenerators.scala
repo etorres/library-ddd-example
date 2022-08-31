@@ -1,16 +1,17 @@
 package es.eriktorr.library
 package lending.infrastructure
 
+import book.infrastructure.BookInstanceGenerators.bookIdGen
 import book.model.BookType
-import lending.model.AvailableBook
-import lending.model.AvailableBook.Book
-import shared.refined.types.infrastructure.RefinedTypesGenerators.uuidGen
+import lending.model.{AvailableBook, LibraryBranchId}
 
 import org.scalacheck.Gen
 
 object LendingGenerators:
+  val libraryBranchIdGen: Gen[LibraryBranchId] = Gen.uuid.map(LibraryBranchId.from)
+
   val availableBookGen: Gen[AvailableBook] = for
-    bookId <- uuidGen
+    bookId <- bookIdGen
     bookType <- Gen.oneOf(BookType.values.toList)
-    libraryBranchId <- uuidGen
-  yield AvailableBook(Book(bookId, bookType), libraryBranchId)
+    libraryBranchId <- libraryBranchIdGen
+  yield AvailableBook(bookId, bookType, libraryBranchId)

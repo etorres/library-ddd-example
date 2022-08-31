@@ -1,10 +1,12 @@
 package es.eriktorr.library
 package catalogue.integration
 
-import book.infrastructure.BookGenerators.{bookGen, bookInstanceGen}
-import book.model.{Book, BookInstance}
+import book.infrastructure.BookInstanceGenerators.bookInstanceGen
+import book.model.BookInstance
+import catalogue.infrastructure.CatalogueGenerators.bookGen
 import catalogue.infrastructure.JdbcCatalogue
 import catalogue.integration.JdbcCatalogueSuite.{testCaseGen, TestCase}
+import catalogue.model.Book
 import shared.infrastructure.{JdbcTestConfig, JdbcTransactorsSuite}
 
 import cats.effect.IO

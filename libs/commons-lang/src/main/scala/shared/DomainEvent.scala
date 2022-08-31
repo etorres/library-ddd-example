@@ -1,9 +1,8 @@
 package es.eriktorr.library
 package shared
 
-import shared.refined.types.UUID
-
 import java.time.Instant
+import java.util.UUID
 
-abstract class DomainEvent(eventId: UUID, when: Instant):
+abstract class DomainEvent(eventId: EventId, when: Instant):
   val aggregateId: UUID

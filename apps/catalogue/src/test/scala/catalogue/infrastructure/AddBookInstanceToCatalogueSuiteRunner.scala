@@ -1,31 +1,32 @@
 package es.eriktorr.library
 package catalogue.infrastructure
 
-import book.model.{Book, BookInstance, BookInstanceAddedToCatalogue}
+import book.model.{BookInstance, BookInstanceAddedToCatalogue}
 import catalogue.application.AddBookInstanceToCatalogue
 import catalogue.infrastructure.FakeCatalogue.CatalogueState
+import catalogue.model.Book
 import shared.infrastructure.FakeClock.ClockState
 import shared.infrastructure.FakeEventPublisher.EventPublisherState
-import shared.infrastructure.{FakeClock, FakeEventPublisher}
-import shared.refined.types.UUID
-import shared.refined.types.infrastructure.FakeUUIDGenerator.UUIDGeneratorState
-import shared.refined.types.infrastructure.{FakeUUIDGenerator, UUIDGenerator}
+import shared.infrastructure.FakeUUIDGen.UUIDGenState
+import shared.infrastructure.{FakeClock, FakeEventPublisher, FakeUUIDGen}
 
+import cats.effect.std.UUIDGen
 import cats.effect.{Clock, IO, Ref}
 
 import java.time.Instant
+import java.util.UUID
 
 object AddBookInstanceToCatalogueSuiteRunner:
   final case class AddBookInstanceToCatalogueState(
       catalogueState: CatalogueState,
       clockState: ClockState,
       eventPublisherState: EventPublisherState[BookInstanceAddedToCatalogue],
-      uuidGeneratorState: UUIDGeneratorState,
+      uuidGeneratorState: UUIDGenState,
   ):
     def clearInstants: AddBookInstanceToCatalogueState = copy(clockState = ClockState.empty)
 
     def clearUUIDs: AddBookInstanceToCatalogueState =
-      copy(uuidGeneratorState = UUIDGeneratorState.empty)
+      copy(uuidGeneratorState = UUIDGenState.empty)
 
     def setBooks(books: Map[Book, List[BookInstance]]): AddBookInstanceToCatalogueState =
       copy(catalogueState = catalogueState.set(books))
@@ -44,7 +45,7 @@ object AddBookInstanceToCatalogueSuiteRunner:
       CatalogueState.empty,
       ClockState.empty,
       EventPublisherState.empty[BookInstanceAddedToCatalogue],
-      UUIDGeneratorState.empty,
+      UUIDGenState.empty,
     )
 
   def runWith[A](initialState: AddBookInstanceToCatalogueState)(
@@ -55,12 +56,12 @@ object AddBookInstanceToCatalogueSuiteRunner:
     eventPublisherStateRef <- Ref.of[IO, EventPublisherState[BookInstanceAddedToCatalogue]](
       initialState.eventPublisherState,
     )
-    uuidGeneratorStateRef <- Ref.of[IO, UUIDGeneratorState](initialState.uuidGeneratorState)
+    uuidGeneratorStateRef <- Ref.of[IO, UUIDGenState](initialState.uuidGeneratorState)
     catalogue = FakeCatalogue(catalogueStateRef)
     eventPublisher = FakeEventPublisher(eventPublisherStateRef)
     addBookInstanceToCatalogue = {
       given Clock[IO] = FakeClock(clockStateRef)
-      given UUIDGenerator[IO] = FakeUUIDGenerator(uuidGeneratorStateRef)
+      given UUIDGen[IO] = FakeUUIDGen(uuidGeneratorStateRef)
       AddBookInstanceToCatalogue(catalogue, eventPublisher)
     }
     result <- run(addBookInstanceToCatalogue).attempt
