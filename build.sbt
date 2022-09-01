@@ -54,6 +54,7 @@ lazy val lending =
       `commons-lang` % "test->test;compile->compile",
     )
     .mainDependencies(
+      avro,
       catsCore,
       catsEffect,
       catsEffectKernel,
@@ -125,6 +126,7 @@ lazy val `commons-kafka` = project
     fs2Core,
     fs2Kafka,
     fs2KafkaVulcan,
+    log4catsCore,
     schemaRegistryClient,
     vulcan,
   )

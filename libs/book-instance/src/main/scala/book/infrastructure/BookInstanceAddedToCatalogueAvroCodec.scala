@@ -6,7 +6,7 @@ import shared.Namespaces
 import shared.infrastructure.EventIdAvroCodec
 
 import cats.syntax.apply.*
-import vulcan.{AvroError, Codec}
+import vulcan.Codec
 
 trait BookInstanceAddedToCatalogueAvroCodec extends BookInstanceAvroCodec with EventIdAvroCodec:
   implicit val bookInstanceAddedToCatalogueAvroCodec: Codec[BookInstanceAddedToCatalogue] =

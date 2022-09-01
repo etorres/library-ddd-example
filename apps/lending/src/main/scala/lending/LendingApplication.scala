@@ -1,11 +1,17 @@
 package es.eriktorr.library
 package lending
 
-import lending.application.CreateAvailableBookOnInstanceAdded
-import lending.infrastructure.{JdbcBooks, KafkaBookInstanceAddedToCatalogueEventHandler}
+import lending.application.{CreateAvailableBookOnInstanceAdded, ReactToChangeOnBookState}
+import lending.infrastructure.KafkaBookStateChangedEvenHandlers.*
+import lending.infrastructure.{
+  JdbcBooks,
+  KafkaBookDuplicateHoldFoundEventPublisher,
+  KafkaBookInstanceAddedToCatalogueEventHandler,
+}
 
 import cats.effect.std.Console
 import cats.effect.{ExitCode, IO, IOApp}
+import cats.syntax.parallel.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
@@ -30,17 +36,47 @@ object LendingApplication extends IOApp:
       logger: Logger[IO],
   ): IO[Unit] =
     LendingResources.impl(configuration, runtime.compute).use {
-      case LendingResources(bookInstanceAddedToCatalogueConsumer, jdbcTransactor) =>
+      case LendingResources(
+            bookInstanceAddedToCatalogueConsumer,
+            bookPlacedOnHoldConsumer,
+            bookCheckedOutConsumer,
+            bookHoldExpiredConsumer,
+            bookHoldCanceledConsumer,
+            bookReturnedConsumer,
+            bookDuplicateHoldFoundProducer,
+            jdbcTransactor,
+          ) =>
         val books = JdbcBooks(jdbcTransactor)
-        val bookInstanceAddedToCatalogueEventHandler =
-          KafkaBookInstanceAddedToCatalogueEventHandler(bookInstanceAddedToCatalogueConsumer)
+
         val createAvailableBookOnInstanceAdded =
           CreateAvailableBookOnInstanceAdded(
             books,
-            bookInstanceAddedToCatalogueEventHandler,
+            KafkaBookInstanceAddedToCatalogueEventHandler(bookInstanceAddedToCatalogueConsumer),
             parameters.libraryBranchId,
           )
+
+        val reactToChangeOnBookState = ReactToChangeOnBookState(
+          books,
+          KakfaBookPlacedOnHoldEventHandler(bookPlacedOnHoldConsumer),
+          KakfaBookCheckedOutEventHandler(bookCheckedOutConsumer),
+          KakfaBookHoldExpiredEventHandler(bookHoldExpiredConsumer),
+          KakfaBookHoldCanceledEventHandler(bookHoldCanceledConsumer),
+          KakfaBookReturnedEventHandler(bookReturnedConsumer),
+          KafkaBookDuplicateHoldFoundEventPublisher(
+            bookDuplicateHoldFoundProducer,
+            configuration.kafkaConfig.topic,
+            logger,
+          ),
+        )
+
         logger.info(
           s"Started library ${parameters.libraryBranchId}",
-        ) *> createAvailableBookOnInstanceAdded.handle.compile.drain
+        ) *> (
+          createAvailableBookOnInstanceAdded.handle.compile.drain,
+          reactToChangeOnBookState.handleBookPlacedOnHold.compile.drain,
+          reactToChangeOnBookState.handleBookCheckedOut.compile.drain,
+          reactToChangeOnBookState.handleBookHoldExpired.compile.drain,
+          reactToChangeOnBookState.handleBookHoldCanceled.compile.drain,
+          reactToChangeOnBookState.handleBookReturned.compile.drain,
+        ).parMapN((_, _, _, _, _, _) => ())
     }

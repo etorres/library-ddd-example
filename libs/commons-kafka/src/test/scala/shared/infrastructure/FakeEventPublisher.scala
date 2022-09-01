@@ -1,12 +1,13 @@
 package es.eriktorr.library
 package shared.infrastructure
 
+import shared.DomainEvent
 import shared.infrastructure.EventPublisher
 import shared.infrastructure.FakeEventPublisher.EventPublisherState
 
 import cats.effect.{IO, Ref}
 
-final class FakeEventPublisher[A](stateRef: Ref[IO, EventPublisherState[A]])
+final class FakeEventPublisher[A <: DomainEvent](stateRef: Ref[IO, EventPublisherState[A]])
     extends EventPublisher[A]:
   override def publish(event: A): IO[Unit] =
     stateRef.update(currentState => currentState.copy(event :: currentState.events))

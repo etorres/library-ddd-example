@@ -44,6 +44,6 @@ object CreateAvailableBookOnInstanceAddedSuite:
       .from(libraryBranchId)
       .setEvents(List(bookInstanceAddedToCatalogue))
     expectedState = initialState.clearEvents.setBooks(
-      List(AvailableBook.from(bookInstanceAddedToCatalogue.bookInstance, libraryBranchId)),
+      List(AvailableBook.from(bookInstanceAddedToCatalogue, libraryBranchId)),
     )
   yield TestCase(initialState, expectedState)

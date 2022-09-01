@@ -33,7 +33,7 @@ final class KafkaBookInstanceAddedToCatalogueEventPublisherSuite
         )
         eventPublisher = KafkaBookInstanceAddedToCatalogueEventPublisher(
           producer,
-          kafkaTestConfig.kafkaConfig.topic.value,
+          kafkaTestConfig.kafkaConfig.topic,
           logger,
         )
         _ <- eventPublisher.publish(event)

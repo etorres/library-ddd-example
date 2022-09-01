@@ -1,11 +1,14 @@
 package es.eriktorr.library
 package lending.application
 
-import lending.model.BookEvent.*
-import lending.model.Books
-import shared.infrastructure.EventHandler
+import lending.model.Book.{AvailableBook, BookOnHold, CheckedOutBook}
+import lending.model.BookStateChange.*
+import lending.model.{BookDuplicateHoldFound, Books}
+import shared.EventId
+import shared.infrastructure.{EventHandler, EventPublisher}
 
-import cats.effect.IO
+import cats.effect.std.UUIDGen
+import cats.effect.{Clock, IO}
 import fs2.Stream
 
 final class ReactToChangeOnBookState(
@@ -15,67 +18,84 @@ final class ReactToChangeOnBookState(
     bookHoldExpiredEventHandler: EventHandler[BookHoldExpired],
     bookHoldCanceledEventHandler: EventHandler[BookHoldCanceled],
     bookReturnedEventHandler: EventHandler[BookReturned],
-):
-  def handleBookPlacedOnHold: Stream[IO, Unit] = bookPlacedOnHoldEventHandler.handleWith { event =>
+    bookDuplicateHoldFoundEventPublisher: EventPublisher[BookDuplicateHoldFound],
+)(using clock: Clock[IO], uuidGenerator: UUIDGen[IO]):
+  def handleBookPlacedOnHold: Stream[IO, Unit] = bookPlacedOnHoldEventHandler.handleWith {
+    bookPlacedOnHold =>
+      for
+        currentBook <- books.findBy(bookPlacedOnHold.bookId)
+        _ <- currentBook.fold(IO.unit) { book =>
+          book match
+            case _: AvailableBook => books.save(BookOnHold.from(bookPlacedOnHold))
+            case bookOnHold: BookOnHold =>
+              if bookOnHold.byPatron != bookPlacedOnHold.patronId then
+                raiseDuplicateHoldFoundEvent(bookOnHold, bookPlacedOnHold)
+              else IO.unit
+            case _: CheckedOutBook => IO.unit
+        }
+      yield ()
+  }
+
+  def handleBookCheckedOut: Stream[IO, Unit] = bookCheckedOutEventHandler.handleWith {
+    bookCheckedOut =>
+      for
+        currentBook <- books.findBy(bookCheckedOut.bookId)
+        _ <- currentBook.fold(IO.unit) { book =>
+          book match
+            case _: AvailableBook => IO.unit
+            case _: BookOnHold => books.save(CheckedOutBook.from(bookCheckedOut))
+            case _: CheckedOutBook => IO.unit
+        }
+      yield ()
+  }
+
+  def handleBookHoldExpired: Stream[IO, Unit] = bookHoldExpiredEventHandler.handleWith {
+    bookHoldExpired =>
+      for
+        currentBook <- books.findBy(bookHoldExpired.bookId)
+        _ <- currentBook.fold(IO.unit) { book =>
+          book match
+            case _: AvailableBook => IO.unit
+            case bookOnHold: BookOnHold =>
+              books.save(AvailableBook.from(bookOnHold, bookHoldExpired))
+            case _: CheckedOutBook => IO.unit
+        }
+      yield ()
+  }
+
+  def handleBookHoldCanceled: Stream[IO, Unit] = bookHoldCanceledEventHandler.handleWith {
+    bookHoldCanceled =>
+      for
+        currentBook <- books.findBy(bookHoldCanceled.bookId)
+        _ <- currentBook.fold(IO.unit) { book =>
+          book match
+            case _: AvailableBook => IO.unit
+            case bookOnHold: BookOnHold =>
+              books.save(AvailableBook.from(bookOnHold, bookHoldCanceled))
+            case _: CheckedOutBook => IO.unit
+        }
+      yield ()
+  }
+
+  def handleBookReturned: Stream[IO, Unit] = bookReturnedEventHandler.handleWith { bookReturned =>
     for
-      book <- books.findBy(event.bookId)
-      _ <- book.fold(IO.unit) {
-        ???
-        ???
-        ???
+      currentBook <- books.findBy(bookReturned.bookId)
+      _ <- currentBook.fold(IO.unit) { book =>
+        book match
+          case _: AvailableBook => IO.unit
+          case bookOnHold: BookOnHold => books.save(AvailableBook.from(bookOnHold, bookReturned))
+          case _: CheckedOutBook => IO.unit
       }
     yield ()
   }
 
-  /*
-  @EventListener
-      void handle(BookPlacedOnHold bookPlacedOnHold) {
-          bookRepository.findBy(new BookId(bookPlacedOnHold.getBookId()))
-                  .map(book -> handleBookPlacedOnHold(book, bookPlacedOnHold))
-                  .map(this::saveBook);
-      }
-
-  private Book handleBookPlacedOnHold(Book book, BookPlacedOnHold bookPlacedOnHold) {
-          return API.Match(book).of(
-                  Case($(instanceOf(AvailableBook.class)), availableBook -> availableBook.handle(bookPlacedOnHold)),
-                  Case($(instanceOf(BookOnHold.class)), bookOnHold -> raiseDuplicateHoldFoundEvent(bookOnHold, bookPlacedOnHold)),
-                  Case($(), () -> book)
-          );
-      }
-
-  private Book saveBook(Book book) {
-          bookRepository.save(book);
-          return book;
-      }
-   */
-
-  def handleBookCheckedOut: Stream[IO, Unit] = for _ <- bookCheckedOutEventHandler.handleWith {
-      event =>
-        ???
-        ???
-        ???
-    }
-  yield ()
-
-  def handleBookHoldExpired: Stream[IO, Unit] = for _ <- bookHoldExpiredEventHandler.handleWith {
-      event =>
-        ???
-        ???
-        ???
-    }
-  yield ()
-
-  def handleBookHoldCanceled: Stream[IO, Unit] = for _ <- bookHoldCanceledEventHandler.handleWith {
-      event =>
-        ???
-        ???
-        ???
-    }
-  yield ()
-
-  def handleBookReturned: Stream[IO, Unit] = for _ <- bookReturnedEventHandler.handleWith { event =>
-      ???
-      ???
-      ???
-    }
+  private[this] def raiseDuplicateHoldFoundEvent(
+      bookOnHold: BookOnHold,
+      bookPlacedOnHold: BookPlacedOnHold,
+  ) = for
+    eventId <- uuidGenerator.randomUUID.map(EventId.from)
+    when <- clock.realTimeInstant
+    _ <- bookDuplicateHoldFoundEventPublisher.publish(
+      BookDuplicateHoldFound.from(eventId, when, bookOnHold, bookPlacedOnHold),
+    )
   yield ()

@@ -2,20 +2,15 @@ package es.eriktorr.library
 package catalogue.infrastructure
 
 import book.model.BookInstanceAddedToCatalogue
-import shared.infrastructure.EventPublisher
+import shared.infrastructure.EventPublisher.SimpleEventPublisher
 import shared.infrastructure.KafkaClients.KafkaProducerIO
+import shared.infrastructure.KafkaConfig.Topic
 
 import cats.effect.IO
-import fs2.kafka.{ProducerRecord, ProducerRecords}
 import org.typelevel.log4cats.Logger
 
 final class KafkaBookInstanceAddedToCatalogueEventPublisher(
     producer: KafkaProducerIO[BookInstanceAddedToCatalogue],
-    topic: String,
+    topic: Topic,
     logger: Logger[IO],
-) extends EventPublisher[BookInstanceAddedToCatalogue]:
-  override def publish(event: BookInstanceAddedToCatalogue): IO[Unit] = IO.unit <* producer
-    .produce(ProducerRecords.one(ProducerRecord(topic, event.eventId.asString, event)))
-    .handleErrorWith { case error: Throwable =>
-      logger.error(error)("The event could not be published") *> IO.raiseError(error)
-    }
+) extends SimpleEventPublisher[BookInstanceAddedToCatalogue](producer, topic, logger)

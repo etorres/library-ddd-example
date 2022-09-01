@@ -35,7 +35,7 @@ object CatalogueApplication extends IOApp:
         val bookInstanceAddedToCatalogueEventPublisher =
           KafkaBookInstanceAddedToCatalogueEventPublisher(
             bookInstanceAddedToCatalogueProducer,
-            configuration.kafkaConfig.topic.value,
+            configuration.kafkaConfig.topic,
             logger,
           )
         val addBookInstanceToCatalogue =

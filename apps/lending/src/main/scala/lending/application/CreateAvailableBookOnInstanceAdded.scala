@@ -16,7 +16,7 @@ final class CreateAvailableBookOnInstanceAdded(
     libraryBranchId: LibraryBranchId,
 ):
   def handle: Stream[IO, Unit] = for _ <- eventHandler.handleWith { event =>
-      val availableBook = AvailableBook.from(event.bookInstance, libraryBranchId)
+      val availableBook = AvailableBook.from(event, libraryBranchId)
       books.save(availableBook)
     }
   yield ()
