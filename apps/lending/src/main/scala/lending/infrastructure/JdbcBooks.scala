@@ -8,9 +8,12 @@ import lending.infrastructure.LibraryBranchIdJdbcMapping
 import lending.model.*
 import lending.model.Book.{AvailableBook, BookOnHold, CheckedOutBook}
 import lending.model.BookState.{Available, CheckedOut, OnHold}
+import shared.ValidationError
+import shared.validated.AllErrorsOr
 import shared.validated.ValidatedIO.validatedNecIO
 
 import cats.effect.IO
+import cats.syntax.all.*
 import doobie.Transactor
 import doobie.implicits.*
 import doobie.postgres.implicits.*
@@ -37,7 +40,7 @@ final class JdbcBooks(transactor: Transactor[IO])
           $bookType,
           ${BookState.Available},
           $libraryBranchId
-        )""".stripMargin.update.run.transact(transactor)
+        )""".update.run.transact(transactor)
     case _ => IO.unit
 
   override def findBy(bookId: BookId): IO[Option[Book]] = sql"""
@@ -52,37 +55,23 @@ final class JdbcBooks(transactor: Transactor[IO])
         checked_out_by_patron,
         on_hold_till
       FROM books
-      WHERE book_id = $bookId""".stripMargin
+      WHERE book_id = $bookId"""
     .query[RawBook]
     .option
     .transact(transactor)
     .flatMap {
       case Some(rawBook) =>
         (rawBook.bookState match
-          case Available =>
-            AvailableBook.from(rawBook.bookId, rawBook.bookType, rawBook.availableAtBranch)
-          case CheckedOut =>
-            CheckedOutBook
-              .from(
-                rawBook.bookId,
-                rawBook.bookType,
-                rawBook.checkedOutAtBranch,
-                rawBook.checkedOutByPatron,
-              )
-          case OnHold =>
-            BookOnHold
-              .from(
-                rawBook.bookId,
-                rawBook.bookType,
-                rawBook.onHoldAtBranch,
-                rawBook.onHoldByPatron,
-                rawBook.onHoldTill,
-              )
+          case Available => rawBook.asAvailableBook
+          case CheckedOut => rawBook.asCheckedOutBook
+          case OnHold => rawBook.asBookOnHold
         ).validated.map(Some.apply)
       case None => IO.pure(None)
     }
 
 object JdbcBooks:
+  final case class InvalidDatabaseEntity(message: String) extends ValidationError(message)
+
   final case class RawBook(
       bookId: BookId,
       bookType: BookType,
@@ -93,4 +82,39 @@ object JdbcBooks:
       checkedOutAtBranch: Option[LibraryBranchId],
       checkedOutByPatron: Option[PatronId],
       onHoldTill: Option[Instant],
-  )
+  ):
+    def asAvailableBook: AllErrorsOr[AvailableBook] =
+      (
+        bookId.validNec,
+        bookType.validNec,
+        availableAtBranch.fold(
+          InvalidDatabaseEntity(s"Missing library branch Id for available book: $bookId").invalidNec,
+        )(_.validNec),
+      ).mapN(AvailableBook.apply)
+
+    def asBookOnHold: AllErrorsOr[BookOnHold] = (
+      bookId.validNec,
+      bookType.validNec,
+      onHoldAtBranch.fold(
+        InvalidDatabaseEntity(s"Missing library branch for book on hold: $bookId").invalidNec,
+      )(_.validNec),
+      onHoldByPatron.fold(
+        InvalidDatabaseEntity(s"Missing patron for book on hold: $bookId").invalidNec,
+      )(
+        _.validNec,
+      ),
+      onHoldTill.validNec,
+    ).mapN(BookOnHold.apply)
+
+    def asCheckedOutBook: AllErrorsOr[CheckedOutBook] = (
+      bookId.validNec,
+      bookType.validNec,
+      checkedOutAtBranch.fold(
+        InvalidDatabaseEntity(s"Missing library branch for checked out book: $bookId").invalidNec,
+      )(_.validNec),
+      checkedOutByPatron.fold(
+        InvalidDatabaseEntity(s"Missing patron for checked out book: $bookId").invalidNec,
+      )(
+        _.validNec,
+      ),
+    ).mapN(CheckedOutBook.apply)
