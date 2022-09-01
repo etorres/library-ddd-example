@@ -9,12 +9,12 @@ import shared.infrastructure.EventIdAvroCodec
 import cats.syntax.apply.*
 import vulcan.Codec
 
-trait BookDuplicateHoldFoundAvroCodec 
+trait BookDuplicateHoldFoundAvroCodec
     extends BookIdAvroCodec
     with EventIdAvroCodec
     with LibraryBranchIdAvroCodec
     with PatronIdAvroCodec:
-  implicit val bookDuplicateHoldFoundAvroCodec: Codec[BookDuplicateHoldFound] = 
+  implicit val bookDuplicateHoldFoundAvroCodec: Codec[BookDuplicateHoldFound] =
     Codec.record(
       name = "BookDuplicateHoldFound",
       namespace = Namespaces.default,

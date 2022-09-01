@@ -2,6 +2,7 @@ package es.eriktorr.library
 package lending.infrastructure
 
 import book.infrastructure.{BookIdAvroCodec, BookTypeAvroCodec}
+import book.model.BookType
 import lending.model.BookStateChange.*
 import shared.Namespaces
 import shared.infrastructure.EventIdAvroCodec
@@ -26,7 +27,7 @@ trait BookStateChangedAvroCodecs
         field("when", _.when),
         field("patronId", _.patronId),
         field("bookId", _.bookId),
-        field("bookType", _.bookType),
+        field("bookType", _.bookType, default = Some(BookType.Restricted)),
         field("libraryBranchId", _.libraryBranchId),
         field("till", _.till),
       ).mapN(BookCheckedOut.apply)
@@ -73,7 +74,7 @@ trait BookStateChangedAvroCodecs
         field("when", _.when),
         field("patronId", _.patronId),
         field("bookId", _.bookId),
-        field("bookType", _.bookType),
+        field("bookType", _.bookType, default = Some(BookType.Restricted)),
         field("libraryBranchId", _.libraryBranchId),
         field("holdFrom", _.holdFrom),
         field("holdTill", _.holdTill),
@@ -91,7 +92,7 @@ trait BookStateChangedAvroCodecs
         field("when", _.when),
         field("patronId", _.patronId),
         field("bookId", _.bookId),
-        field("bookType", _.bookType),
+        field("bookType", _.bookType, default = Some(BookType.Restricted)),
         field("libraryBranchId", _.libraryBranchId),
       ).mapN(BookReturned.apply)
     }
