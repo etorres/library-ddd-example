@@ -3,12 +3,13 @@ package lending.infrastructure
 
 import book.infrastructure.{BookIdJdbcMapping, BookTypeJdbcMapping}
 import book.model.{BookId, BookType}
-import lending.infrastructure.JdbcBooks.RawBook
+import lending.infrastructure.JdbcBooks.{BookJdbcMapping, RawBook}
 import lending.infrastructure.LibraryBranchIdJdbcMapping
 import lending.model.*
 import lending.model.Book.{AvailableBook, BookOnHold, CheckedOutBook}
 import lending.model.BookState.{Available, CheckedOut, OnHold}
-import shared.ValidationError
+import shared.{ValidationError, Version}
+import shared.infrastructure.VersionJdbcMapping
 import shared.validated.AllErrorsOr
 import shared.validated.ValidatedIO.validatedNecIO
 
@@ -21,25 +22,21 @@ import doobie.postgres.implicits.*
 import java.time.Instant
 import java.util.UUID
 
-final class JdbcBooks(transactor: Transactor[IO])
-    extends Books
-    with BookIdJdbcMapping
-    with BookStateJdbcMapping
-    with BookTypeJdbcMapping
-    with LibraryBranchIdJdbcMapping
-    with PatronIdJdbcMapping:
+final class JdbcBooks(transactor: Transactor[IO]) extends Books with BookJdbcMapping:
   override def save(book: Book): IO[Unit] = book match
     case AvailableBook(bookId, bookType, libraryBranchId) => IO.unit <* sql"""
         INSERT INTO books (
           book_id, 
           book_type, 
           book_state, 
-          available_at_branch
+          available_at_branch,
+          version
         ) VALUES (
           $bookId,
           $bookType,
           ${BookState.Available},
-          $libraryBranchId
+          $libraryBranchId,
+          ${Version.init}
         )""".update.run.transact(transactor)
     case _ => IO.unit
 
@@ -53,7 +50,8 @@ final class JdbcBooks(transactor: Transactor[IO])
         on_hold_by_patron,
         checked_out_at_branch,
         checked_out_by_patron,
-        on_hold_till
+        on_hold_till,
+        version
       FROM books
       WHERE book_id = $bookId"""
     .query[RawBook]
@@ -70,6 +68,14 @@ final class JdbcBooks(transactor: Transactor[IO])
     }
 
 object JdbcBooks:
+  trait BookJdbcMapping
+      extends BookIdJdbcMapping
+      with BookStateJdbcMapping
+      with BookTypeJdbcMapping
+      with LibraryBranchIdJdbcMapping
+      with PatronIdJdbcMapping
+      with VersionJdbcMapping
+
   final case class InvalidDatabaseEntity(message: String) extends ValidationError(message)
 
   final case class RawBook(
@@ -82,13 +88,14 @@ object JdbcBooks:
       checkedOutAtBranch: Option[LibraryBranchId],
       checkedOutByPatron: Option[PatronId],
       onHoldTill: Option[Instant],
+      version: Long,
   ):
     def asAvailableBook: AllErrorsOr[AvailableBook] =
       (
         bookId.validNec,
         bookType.validNec,
         availableAtBranch.fold(
-          InvalidDatabaseEntity(s"Missing library branch Id for available book: $bookId").invalidNec,
+          InvalidDatabaseEntity(s"Missing library branch for available book: $bookId").invalidNec,
         )(_.validNec),
       ).mapN(AvailableBook.apply)
 

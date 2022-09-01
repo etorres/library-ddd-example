@@ -24,7 +24,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
           on_hold_by_patron UUID,
           checked_out_at_branch UUID,
           checked_out_by_patron UUID,
-          on_hold_till TIMESTAMP
+          on_hold_till TIMESTAMP,
+          version BIGINT NOT NULL
         )';
       END LOOP;
     END\$\$;
