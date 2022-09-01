@@ -141,7 +141,7 @@ lazy val `commons-lang` =
   project
     .library("commons-lang")
     .mainDependencies(catsCore, catsEffect, catsEffectKernel)
-    .optionalDependencies(avro, doobieCore, typename, vulcan)
+    .optionalDependencies(avro, vulcan)
     .testDependencies(
       munit,
       munitCatsEffect,

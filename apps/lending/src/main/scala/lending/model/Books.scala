@@ -6,6 +6,6 @@ import book.model.BookId
 import cats.effect.IO
 
 trait Books:
-  def save(book: Book): IO[Unit]
-
   def findBy(bookId: BookId): IO[Option[Book]]
+
+  def save(book: Book): IO[Unit]
