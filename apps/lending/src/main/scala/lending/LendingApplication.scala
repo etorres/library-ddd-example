@@ -1,7 +1,7 @@
 package es.eriktorr.library
 package lending
 
-import lending.application.{CreateAvailableBookOnInstanceAdded, ReactToChangeOnBookState}
+import lending.application.{CreateAvailableBookOnInstanceAdded, ReactToBookStateChanged}
 import lending.infrastructure.{
   JdbcBooks,
   KafkaBookDuplicateHoldFoundEventPublisher,
@@ -51,7 +51,7 @@ object LendingApplication extends IOApp:
             parameters.libraryBranchId,
           )
 
-        val reactToChangeOnBookState = ReactToChangeOnBookState(
+        val reactToBookStateChanged = ReactToBookStateChanged(
           books,
           KafkaBookStateChangedEvenHandler(bookStateChangedConsumer),
           KafkaBookDuplicateHoldFoundEventPublisher(
@@ -65,6 +65,6 @@ object LendingApplication extends IOApp:
           s"Started library ${parameters.libraryBranchId}",
         ) *> (
           createAvailableBookOnInstanceAdded.handle.compile.drain,
-          reactToChangeOnBookState.handle.compile.drain,
+          reactToBookStateChanged.handle.compile.drain,
         ).parMapN((_, _) => ())
     }

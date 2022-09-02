@@ -11,7 +11,7 @@ import cats.effect.std.UUIDGen
 import cats.effect.{Clock, IO}
 import fs2.Stream
 
-final class ReactToChangeOnBookState(
+final class ReactToBookStateChanged(
     books: Books,
     bookStateChangedEvenHandler: EventHandler[BookStateChanged],
     bookDuplicateHoldFoundEventPublisher: EventPublisher[BookDuplicateHoldFound],
