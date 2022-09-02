@@ -3,9 +3,9 @@ package lending.infrastructure
 
 import book.infrastructure.BookInstanceGenerators.bookIdGen
 import book.model.BookType
-import lending.model.Book.AvailableBook
+import lending.model.*
+import lending.model.Book.{AvailableBook, BookOnHold, CheckedOutBook}
 import lending.model.BookStateChanged.*
-import lending.model.{BookDuplicateHoldFound, BookStateChanged, LibraryBranchId, PatronId}
 import shared.infrastructure.TimeGenerators.instantArbitrary
 import shared.refined.types.infrastructure.RefinedTypesGenerators.eventIdGen
 
@@ -16,11 +16,29 @@ object LendingGenerators:
 
   val patronIdGen: Gen[PatronId] = Gen.uuid.map(PatronId.from)
 
-  val availableBookGen: Gen[AvailableBook] = for
+  private[this] val availableBookGen: Gen[AvailableBook] = for
     bookId <- bookIdGen
     bookType <- Gen.oneOf(BookType.values.toList)
     libraryBranchId <- libraryBranchIdGen
   yield AvailableBook(bookId, bookType, libraryBranchId)
+
+  private[this] val bookOnHoldGen: Gen[BookOnHold] = for
+    bookId <- bookIdGen
+    bookType <- Gen.oneOf(BookType.values.toList)
+    holdPlacedAt <- libraryBranchIdGen
+    byPatron <- patronIdGen
+    holdTill <- Gen.option(instantArbitrary.arbitrary)
+  yield BookOnHold(bookId, bookType, holdPlacedAt, byPatron, holdTill)
+
+  private[this] val checkedOutBookGen: Gen[CheckedOutBook] = for
+    bookId <- bookIdGen
+    bookType <- Gen.oneOf(BookType.values.toList)
+    checkedOutAt <- libraryBranchIdGen
+    byPatron <- patronIdGen
+  yield CheckedOutBook(bookId, bookType, checkedOutAt, byPatron)
+
+  val bookGen: Gen[Book] =
+    Gen.frequency(1 -> availableBookGen, 1 -> bookOnHoldGen, 1 -> checkedOutBookGen)
 
   private[this] val bookCheckedOutGen: Gen[BookCheckedOut] = for
     eventId <- eventIdGen
