@@ -2,11 +2,11 @@ package es.eriktorr.library
 package lending
 
 import lending.application.{CreateAvailableBookOnInstanceAdded, ReactToChangeOnBookState}
-import lending.infrastructure.KafkaBookStateChangedEvenHandlers.*
 import lending.infrastructure.{
   JdbcBooks,
   KafkaBookDuplicateHoldFoundEventPublisher,
   KafkaBookInstanceAddedToCatalogueEventHandler,
+  KafkaBookStateChangedEvenHandler,
 }
 
 import cats.effect.std.Console
@@ -38,11 +38,7 @@ object LendingApplication extends IOApp:
     LendingResources.impl(configuration, runtime.compute).use {
       case LendingResources(
             bookInstanceAddedToCatalogueConsumer,
-            bookPlacedOnHoldConsumer,
-            bookCheckedOutConsumer,
-            bookHoldExpiredConsumer,
-            bookHoldCanceledConsumer,
-            bookReturnedConsumer,
+            bookStateChangedConsumer,
             bookDuplicateHoldFoundProducer,
             jdbcTransactor,
           ) =>
@@ -57,14 +53,10 @@ object LendingApplication extends IOApp:
 
         val reactToChangeOnBookState = ReactToChangeOnBookState(
           books,
-          KakfaBookPlacedOnHoldEventHandler(bookPlacedOnHoldConsumer),
-          KakfaBookCheckedOutEventHandler(bookCheckedOutConsumer),
-          KakfaBookHoldExpiredEventHandler(bookHoldExpiredConsumer),
-          KakfaBookHoldCanceledEventHandler(bookHoldCanceledConsumer),
-          KakfaBookReturnedEventHandler(bookReturnedConsumer),
+          KafkaBookStateChangedEvenHandler(bookStateChangedConsumer),
           KafkaBookDuplicateHoldFoundEventPublisher(
             bookDuplicateHoldFoundProducer,
-            configuration.kafkaConfig.topic,
+            configuration.bookStateErrorsKafkaConfig.topic,
             logger,
           ),
         )
@@ -73,10 +65,6 @@ object LendingApplication extends IOApp:
           s"Started library ${parameters.libraryBranchId}",
         ) *> (
           createAvailableBookOnInstanceAdded.handle.compile.drain,
-          reactToChangeOnBookState.handleBookPlacedOnHold.compile.drain,
-          reactToChangeOnBookState.handleBookCheckedOut.compile.drain,
-          reactToChangeOnBookState.handleBookHoldExpired.compile.drain,
-          reactToChangeOnBookState.handleBookHoldCanceled.compile.drain,
-          reactToChangeOnBookState.handleBookReturned.compile.drain,
-        ).parMapN((_, _, _, _, _, _) => ())
+          reactToChangeOnBookState.handle.compile.drain,
+        ).parMapN((_, _) => ())
     }

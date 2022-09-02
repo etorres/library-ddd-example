@@ -15,19 +15,33 @@ import cats.effect.IO
 import cats.syntax.parallel.*
 import ciris.env
 
-final case class LendingConfiguration(jdbcConfig: JdbcConfig, kafkaConfig: KafkaConfig):
-  def asString: String = s"${jdbcConfig.asString}, ${kafkaConfig.asString}"
+final case class LendingConfiguration(
+    jdbcConfig: JdbcConfig,
+    bookInstancesKafkaConfig: KafkaConfig,
+    bookStateChangesKafkaConfig: KafkaConfig,
+    bookStateErrorsKafkaConfig: KafkaConfig,
+):
+  def asString: String =
+    s"""
+       |jdbc-lending: ${jdbcConfig.asString}, 
+       |kafka-book-instances: ${bookInstancesKafkaConfig.asString}
+       |kafka-book-state-changes: ${bookStateChangesKafkaConfig.asString}
+       |kafka-book-state-errors: ${bookStateErrorsKafkaConfig.asString}""".stripMargin
+      .replaceAll("\\R", "")
+      .nn
 
 object LendingConfiguration extends KafkaConfigConfigDecoder with NonEmptyStringConfigDecoder:
   private[this] val lendingConfiguration = (
     env("JDBC_DRIVER_CLASS_NAME").as[NonEmptyString],
-    env("JDBC_CONNECT_URL").as[NonEmptyString],
-    env("JDBC_USER").as[NonEmptyString],
-    env("JDBC_PASSWORD").as[NonEmptyString].secret,
+    env("JDBC_CONNECT_URL_LENDING").as[NonEmptyString],
+    env("JDBC_USER_LENDING").as[NonEmptyString],
+    env("JDBC_PASSWORD_LENDING").as[NonEmptyString].secret,
     env("KAFKA_BOOTSTRAP_SERVERS").as[NonEmptyList[BootstrapServer]],
-    env("KAFKA_CONSUMER_GROUP").as[ConsumerGroup],
-    env("KAFKA_TOPIC").as[Topic],
+    env("KAFKA_CONSUMER_GROUP_LENDING").as[ConsumerGroup],
     env("KAFKA_SCHEMA_REGISTRY").as[SchemaRegistry],
+    env("KAFKA_TOPIC_BOOK_INSTANCES").as[Topic],
+    env("KAFKA_TOPIC_BOOK_STATE_CHANGES").as[Topic],
+    env("KAFKA_TOPIC_BOOK_STATE_ERRORS").as[Topic],
   ).parMapN {
     (
         jdbcDriverClassName,
@@ -36,12 +50,31 @@ object LendingConfiguration extends KafkaConfigConfigDecoder with NonEmptyString
         jdbcPassword,
         kafkaBootstrapServers,
         kafkaConsumerGroup,
-        kafkaTopic,
         kafkaSchemaRegistry,
+        kafkaTopicBookInstances,
+        kafkaTopicBookStateChanges,
+        kafkaTopicBookStateErrors,
     ) =>
       LendingConfiguration(
         JdbcConfig(jdbcDriverClassName, jdbcConnectUrl, jdbcUser, jdbcPassword),
-        KafkaConfig(kafkaBootstrapServers, kafkaConsumerGroup, kafkaTopic, kafkaSchemaRegistry),
+        KafkaConfig(
+          kafkaBootstrapServers,
+          kafkaConsumerGroup,
+          kafkaSchemaRegistry,
+          kafkaTopicBookInstances,
+        ),
+        KafkaConfig(
+          kafkaBootstrapServers,
+          kafkaConsumerGroup,
+          kafkaSchemaRegistry,
+          kafkaTopicBookStateChanges,
+        ),
+        KafkaConfig(
+          kafkaBootstrapServers,
+          kafkaConsumerGroup,
+          kafkaSchemaRegistry,
+          kafkaTopicBookStateErrors,
+        ),
       )
   }
 

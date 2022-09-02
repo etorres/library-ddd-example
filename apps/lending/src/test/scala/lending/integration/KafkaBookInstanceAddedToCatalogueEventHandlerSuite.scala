@@ -22,7 +22,7 @@ import scala.concurrent.duration.*
 
 final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
     extends KafkaClientsSuite[BookInstanceAddedToCatalogue]:
-  override def kafkaTestConfig: KafkaTestConfig = KafkaTestConfig.Lending
+  override def kafkaTestConfig: KafkaTestConfig = KafkaTestConfig.LendingBookInstances
 
   test("should handle events from a kafka topic") {
     forAllF(bookInstanceAddedToCatalogueGen) { event =>

@@ -3,20 +3,20 @@ package lending.model
 
 import book.model.BookId
 import lending.model.Book.BookOnHold
-import lending.model.BookStateChange.BookPlacedOnHold
+import lending.model.BookStateChanged.BookPlacedOnHold
 import shared.{DomainEvent, EventId}
 
 import java.time.Instant
 import java.util.UUID
 
 final case class BookDuplicateHoldFound(
-    override val eventId: EventId,
-    override val when: Instant,
+    eventId: EventId,
+    when: Instant,
     firstPatronId: PatronId,
     secondPatronId: PatronId,
     libraryBranchId: LibraryBranchId,
     bookId: BookId,
-) extends DomainEvent(eventId, when):
+) extends DomainEvent:
   override val aggregateId: UUID = bookId.value
 
 object BookDuplicateHoldFound:

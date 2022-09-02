@@ -7,8 +7,8 @@ import java.time.Instant
 import java.util.UUID
 
 final case class BookInstanceAddedToCatalogue(
-    override val eventId: EventId,
-    override val when: Instant,
+    eventId: EventId,
+    when: Instant,
     bookInstance: BookInstance,
-) extends DomainEvent(eventId, when):
+) extends DomainEvent:
   override val aggregateId: UUID = bookInstance.bookId.value

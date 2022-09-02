@@ -16,7 +16,7 @@ final class AvroSchemaCompatibilitySuite
     with SchemaSuite
     with BookInstanceAddedToCatalogueAvroCodec:
 
-  private[this] val kafkaConfig = KafkaTestConfig.Lending.kafkaConfig
+  private[this] val kafkaConfig = KafkaTestConfig.LendingBookInstances.kafkaConfig
 
   private[this] lazy val checker = compatibilityChecker(
     SchemaRegistryClientSettings(kafkaConfig.schemaRegistry.value),

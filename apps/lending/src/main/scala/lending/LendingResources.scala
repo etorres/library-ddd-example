@@ -3,15 +3,9 @@ package lending
 
 import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
 import book.model.BookInstanceAddedToCatalogue
-import lending.model.BookStateChange.{
-  BookCheckedOut,
-  BookHoldCanceled,
-  BookHoldExpired,
-  BookPlacedOnHold,
-  BookReturned,
-}
+import lending.model.BookStateChanged
 import lending.model.BookDuplicateHoldFound
-import lending.infrastructure.{BookDuplicateHoldFoundAvroCodec, BookStateChangedAvroCodecs}
+import lending.infrastructure.{BookDuplicateHoldFoundAvroCodec, BookStateChangedAvroCodec}
 import shared.infrastructure.JdbcTransactor
 import shared.infrastructure.KafkaClients
 import shared.infrastructure.KafkaClients.{KafkaConsumerIO, KafkaProducerIO}
@@ -24,11 +18,7 @@ import scala.concurrent.ExecutionContext
 
 final case class LendingResources(
     bookInstanceAddedToCatalogueConsumer: KafkaConsumerIO[BookInstanceAddedToCatalogue],
-    bookPlacedOnHoldConsumer: KafkaConsumerIO[BookPlacedOnHold],
-    bookCheckedOutConsumer: KafkaConsumerIO[BookCheckedOut],
-    bookHoldExpiredConsumer: KafkaConsumerIO[BookHoldExpired],
-    bookHoldCanceledConsumer: KafkaConsumerIO[BookHoldCanceled],
-    bookReturnedConsumer: KafkaConsumerIO[BookReturned],
+    bookStateChangedConsumer: KafkaConsumerIO[BookStateChanged],
     bookDuplicateHoldFoundProducer: KafkaProducerIO[BookDuplicateHoldFound],
     jdbcTransactor: Transactor[IO],
 )
@@ -36,7 +26,7 @@ final case class LendingResources(
 object LendingResources
     extends BookDuplicateHoldFoundAvroCodec
     with BookInstanceAddedToCatalogueAvroCodec
-    with BookStateChangedAvroCodecs:
+    with BookStateChangedAvroCodec:
   def impl(
       configuration: LendingConfiguration,
       executionContext: ExecutionContext,
@@ -44,31 +34,15 @@ object LendingResources
     for
       bookInstanceAddedToCatalogueConsumer <- KafkaClients
         .kafkaConsumerUsing[BookInstanceAddedToCatalogue](
-          configuration.kafkaConfig,
+          configuration.bookInstancesKafkaConfig,
         )
-      bookPlacedOnHoldConsumer <- KafkaClients
-        .kafkaConsumerUsing[BookPlacedOnHold](
-          configuration.kafkaConfig,
-        )
-      bookCheckedOutConsumer <- KafkaClients
-        .kafkaConsumerUsing[BookCheckedOut](
-          configuration.kafkaConfig,
-        )
-      bookHoldExpiredConsumer <- KafkaClients
-        .kafkaConsumerUsing[BookHoldExpired](
-          configuration.kafkaConfig,
-        )
-      bookHoldCanceledConsumer <- KafkaClients
-        .kafkaConsumerUsing[BookHoldCanceled](
-          configuration.kafkaConfig,
-        )
-      bookReturnedConsumer <- KafkaClients
-        .kafkaConsumerUsing[BookReturned](
-          configuration.kafkaConfig,
+      bookStateChangedConsumer <- KafkaClients
+        .kafkaConsumerUsing[BookStateChanged](
+          configuration.bookStateChangesKafkaConfig,
         )
       bookDuplicateHoldFoundProducer <- KafkaClients
         .kafkaProducerUsing[BookDuplicateHoldFound](
-          configuration.kafkaConfig,
+          configuration.bookStateErrorsKafkaConfig,
         )
       jdbcTransactor <- JdbcTransactor(
         configuration.jdbcConfig,
@@ -76,11 +50,7 @@ object LendingResources
       ).transactorResource
     yield LendingResources(
       bookInstanceAddedToCatalogueConsumer,
-      bookPlacedOnHoldConsumer,
-      bookCheckedOutConsumer,
-      bookHoldExpiredConsumer,
-      bookHoldCanceledConsumer,
-      bookReturnedConsumer,
+      bookStateChangedConsumer,
       bookDuplicateHoldFoundProducer,
       jdbcTransactor,
     )

@@ -26,7 +26,7 @@ object CatalogueResources extends BookInstanceAddedToCatalogueAvroCodec:
     for
       bookInstanceAddedToCatalogueProducer <- KafkaClients
         .kafkaProducerUsing[BookInstanceAddedToCatalogue](
-          configuration.kafkaConfig,
+          configuration.bookInstancesKafkaConfig,
         )
       jdbcTransactor <- JdbcTransactor(
         configuration.jdbcConfig,

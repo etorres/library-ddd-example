@@ -23,15 +23,27 @@ final class LendingConfigurationSuite extends CatsEffectSuite:
       LendingConfiguration(
         JdbcConfig(
           NonEmptyString.unsafeFrom("org.postgresql.Driver"),
-          NonEmptyString.unsafeFrom("jdbc:postgresql://localhost:5432/test_db"),
-          NonEmptyString.unsafeFrom("test_jdbc_user"),
-          Secret(NonEmptyString.unsafeFrom("test_jdbc_password")),
+          NonEmptyString.unsafeFrom("jdbc:postgresql://localhost:5432/test_db_lending"),
+          NonEmptyString.unsafeFrom("test_jdbc_user_lending"),
+          Secret(NonEmptyString.unsafeFrom("test_jdbc_password_lending")),
         ),
         KafkaConfig(
           NonEmptyList.one(BootstrapServer.unsafeFrom("localhost:29092")),
-          ConsumerGroup.unsafeFrom("test_kafka_consumer_group"),
-          Topic.unsafeFrom("test_kafka_topic"),
+          ConsumerGroup.unsafeFrom("test_kafka_consumer_group_lending"),
           SchemaRegistry.unsafeFrom("http://localhost:8081"),
+          Topic.unsafeFrom("test_kafka_topic_book_instances"),
+        ),
+        KafkaConfig(
+          NonEmptyList.one(BootstrapServer.unsafeFrom("localhost:29092")),
+          ConsumerGroup.unsafeFrom("test_kafka_consumer_group_lending"),
+          SchemaRegistry.unsafeFrom("http://localhost:8081"),
+          Topic.unsafeFrom("test_kafka_topic_book_state_changes"),
+        ),
+        KafkaConfig(
+          NonEmptyList.one(BootstrapServer.unsafeFrom("localhost:29092")),
+          ConsumerGroup.unsafeFrom("test_kafka_consumer_group_lending"),
+          SchemaRegistry.unsafeFrom("http://localhost:8081"),
+          Topic.unsafeFrom("test_kafka_topic_book_state_errors"),
         ),
       ),
     )

@@ -2,20 +2,22 @@ package es.eriktorr.library
 package lending.infrastructure
 
 import book.infrastructure.{BookIdAvroCodec, BookTypeAvroCodec}
-import book.model.BookType
-import lending.model.BookStateChange.*
+import lending.model.BookStateChanged
+import lending.model.BookStateChanged.*
 import shared.Namespaces
 import shared.infrastructure.EventIdAvroCodec
 
 import cats.syntax.apply.*
+import cats.syntax.semigroup.*
 import vulcan.Codec
 
-trait BookStateChangedAvroCodecs
+trait BookStateChangedAvroCodec
     extends BookTypeAvroCodec
     with BookIdAvroCodec
     with EventIdAvroCodec
     with LibraryBranchIdAvroCodec
     with PatronIdAvroCodec:
+
   implicit val bookCheckedOutAvroCodec: Codec[BookCheckedOut] =
     Codec.record(
       name = "BookCheckedOut",
@@ -27,9 +29,9 @@ trait BookStateChangedAvroCodecs
         field("when", _.when),
         field("patronId", _.patronId),
         field("bookId", _.bookId),
-        field("bookType", _.bookType, default = Some(BookType.Restricted)),
+        field("bookType", _.bookType, default = None),
         field("libraryBranchId", _.libraryBranchId),
-        field("till", _.till),
+        field("till", _.till, default = None),
       ).mapN(BookCheckedOut.apply)
     }
 
@@ -74,10 +76,10 @@ trait BookStateChangedAvroCodecs
         field("when", _.when),
         field("patronId", _.patronId),
         field("bookId", _.bookId),
-        field("bookType", _.bookType, default = Some(BookType.Restricted)),
+        field("bookType", _.bookType, default = None),
         field("libraryBranchId", _.libraryBranchId),
-        field("holdFrom", _.holdFrom),
-        field("holdTill", _.holdTill),
+        field("holdFrom", _.holdFrom, default = None),
+        field("holdTill", _.holdTill, default = Some(None)),
       ).mapN(BookPlacedOnHold.apply)
     }
 
@@ -92,7 +94,14 @@ trait BookStateChangedAvroCodecs
         field("when", _.when),
         field("patronId", _.patronId),
         field("bookId", _.bookId),
-        field("bookType", _.bookType, default = Some(BookType.Restricted)),
+        field("bookType", _.bookType, default = None),
         field("libraryBranchId", _.libraryBranchId),
       ).mapN(BookReturned.apply)
     }
+
+  implicit val bookStateChangedAvroCodec: Codec[BookStateChanged] = Codec.union[BookStateChanged] {
+    // @formatter:off      
+    alt => alt[BookCheckedOut] |+| alt[BookHoldCanceled] |+| alt[BookHoldExpired] |+| 
+      alt[BookPlacedOnHold] |+| alt[BookReturned]
+    // @formatter:on
+  }

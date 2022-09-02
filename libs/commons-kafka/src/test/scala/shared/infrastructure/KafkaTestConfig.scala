@@ -13,22 +13,40 @@ import shared.infrastructure.KafkaTestConfig.{
 import cats.data.NonEmptyList
 
 enum KafkaTestConfig(val kafkaConfig: KafkaConfig):
-  case Catalogue
+  case CatalogueBookInstances
       extends KafkaTestConfig(
         KafkaConfig(
           KafkaTestConfig.testBootstrapServers,
           KafkaTestConfig.testConsumerGroupFrom("catalogue"),
-          KafkaTestConfig.testTopicFrom("catalogue"),
           KafkaTestConfig.testSchemaRegistry,
+          KafkaTestConfig.testTopicFrom("book-instances-catalogue"),
         ),
       )
-  case Lending
+  case LendingBookInstances
       extends KafkaTestConfig(
         KafkaConfig(
           KafkaTestConfig.testBootstrapServers,
           KafkaTestConfig.testConsumerGroupFrom("lending"),
-          KafkaTestConfig.testTopicFrom("lending"),
           KafkaTestConfig.testSchemaRegistry,
+          KafkaTestConfig.testTopicFrom("book-instances-lending"),
+        ),
+      )
+  case LendingBookStateChanges
+      extends KafkaTestConfig(
+        KafkaConfig(
+          KafkaTestConfig.testBootstrapServers,
+          KafkaTestConfig.testConsumerGroupFrom("lending"),
+          KafkaTestConfig.testSchemaRegistry,
+          KafkaTestConfig.testTopicFrom("book-state-changes-lending"),
+        ),
+      )
+  case LendingBookStateErrors
+      extends KafkaTestConfig(
+        KafkaConfig(
+          KafkaTestConfig.testBootstrapServers,
+          KafkaTestConfig.testConsumerGroupFrom("lending"),
+          KafkaTestConfig.testSchemaRegistry,
+          KafkaTestConfig.testTopicFrom("book-state-errors-lending"),
         ),
       )
 
@@ -39,6 +57,6 @@ object KafkaTestConfig:
       SchemaRegistry.unsafeFrom("http://localhost:8081"),
     )
   final private def testConsumerGroupFrom(name: String) =
-    ConsumerGroup.unsafeFrom(s"$name-library-test")
+    ConsumerGroup.unsafeFrom(s"$name-test")
   final private def testTopicFrom(name: String) =
-    Topic.unsafeFrom(s"$name-library-test")
+    Topic.unsafeFrom(s"$name-test")

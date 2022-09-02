@@ -2,7 +2,7 @@ package es.eriktorr.library
 package lending.model
 
 import book.model.{BookId, BookInstance, BookInstanceAddedToCatalogue, BookType}
-import lending.model.BookStateChange.*
+import lending.model.BookStateChanged.*
 
 import java.time.Instant
 
