@@ -1,53 +1,28 @@
 package es.eriktorr.library
 package lending.integration
 
-import book.infrastructure.BookInstanceGenerators.bookInstanceAddedToCatalogueGen
 import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
+import book.infrastructure.BookInstanceGenerators.bookInstanceAddedToCatalogueGen
 import book.model.BookInstanceAddedToCatalogue
 import lending.infrastructure.KafkaBookInstanceAddedToCatalogueEventHandler
 import lending.integration.KafkaBookInstanceAddedToCatalogueEventHandlerSuite.{
   bookInstanceAddedToCatalogueAvroCodec,
   logger,
 }
-import shared.infrastructure.FakeEventHandler.EventHandlerState
-import shared.infrastructure.{KafkaClientsSuite, KafkaTestConfig}
+import shared.infrastructure.KafkaClientsSuite.KafkaEventHandlerSuite
+import shared.infrastructure.KafkaTestConfig
 
-import cats.effect.{IO, Ref}
-import fs2.kafka.{ProducerRecord, ProducerRecords}
-import org.scalacheck.effect.PropF.forAllF
+import cats.effect.IO
+
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-import scala.concurrent.duration.*
-
 final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
-    extends KafkaClientsSuite[BookInstanceAddedToCatalogue]:
+    extends KafkaEventHandlerSuite[BookInstanceAddedToCatalogue]:
   override def kafkaTestConfig: KafkaTestConfig = KafkaTestConfig.LendingBookInstances
 
   test("should handle new book instance added event in a kafka topic") {
-    forAllF(bookInstanceAddedToCatalogueGen) { event =>
-      val (consumer, producer) = kafkaClientsFixture()
-      for
-        stateRef <- Ref.of[IO, EventHandlerState[BookInstanceAddedToCatalogue]](
-          EventHandlerState.empty,
-        )
-        _ <- producer.produce(
-          ProducerRecords.one(
-            ProducerRecord(kafkaTestConfig.kafkaConfig.topic.value, event.eventId.asString, event),
-          ),
-        )
-        eventHandler = KafkaBookInstanceAddedToCatalogueEventHandler(consumer)
-        _ <- eventHandler
-          .handleWith(event =>
-            stateRef.update(currentState => currentState.copy(event :: currentState.events)),
-          )
-          .timeout(30.seconds)
-          .take(1)
-          .compile
-          .drain
-        finalState <- stateRef.get
-      yield assertEquals(finalState.events, List(event))
-    }
+    checkUsing(bookInstanceAddedToCatalogueGen, KafkaBookInstanceAddedToCatalogueEventHandler(_))
   }
 
 object KafkaBookInstanceAddedToCatalogueEventHandlerSuite

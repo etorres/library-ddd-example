@@ -1,58 +1,35 @@
 package es.eriktorr.library
 package catalogue.integration
 
-import book.infrastructure.BookInstanceGenerators.bookInstanceAddedToCatalogueGen
 import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
+import book.infrastructure.BookInstanceGenerators.bookInstanceAddedToCatalogueGen
 import book.model.BookInstanceAddedToCatalogue
 import catalogue.infrastructure.KafkaBookInstanceAddedToCatalogueEventPublisher
 import catalogue.integration.KafkaBookInstanceAddedToCatalogueEventPublisherSuite.{
   bookInstanceAddedToCatalogueAvroCodec,
   logger,
 }
-import shared.infrastructure.FakeEventPublisher.EventPublisherState
-import shared.infrastructure.{KafkaClientsSuite, KafkaTestConfig}
+import shared.infrastructure.KafkaClientsSuite.KafkaEventPublisherSuite
+import shared.infrastructure.KafkaTestConfig
 
-import cats.effect.{IO, Ref}
-import fs2.kafka.commitBatchWithin
-import org.scalacheck.effect.PropF.forAllF
+import cats.effect.IO
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
-import scala.concurrent.duration.*
-
 final class KafkaBookInstanceAddedToCatalogueEventPublisherSuite
-    extends KafkaClientsSuite[BookInstanceAddedToCatalogue]:
+    extends KafkaEventPublisherSuite[BookInstanceAddedToCatalogue]:
   override def kafkaTestConfig: KafkaTestConfig = KafkaTestConfig.CatalogueBookInstances
 
-  test("should publish events to a topic in kafka") {
-    forAllF(bookInstanceAddedToCatalogueGen) { event =>
-      val (consumer, producer) = kafkaClientsFixture()
-      for
-        stateRef <- Ref.of[IO, EventPublisherState[BookInstanceAddedToCatalogue]](
-          EventPublisherState.empty,
-        )
-        eventPublisher = KafkaBookInstanceAddedToCatalogueEventPublisher(
+  test("should publish new instance books to a topic in kafka") {
+    checkUsing(
+      bookInstanceAddedToCatalogueGen,
+      producer =>
+        KafkaBookInstanceAddedToCatalogueEventPublisher(
           producer,
           kafkaTestConfig.kafkaConfig.topic,
           logger,
-        )
-        _ <- eventPublisher.publish(event)
-        _ <- consumer.stream
-          .evalMap { committable =>
-            stateRef
-              .update(currentState =>
-                currentState.copy(committable.record.value :: currentState.events),
-              )
-              .as(committable.offset)
-          }
-          .through(commitBatchWithin(100, 15.seconds))
-          .timeout(30.seconds)
-          .take(1)
-          .compile
-          .drain
-        finalState <- stateRef.get
-      yield assertEquals(finalState.events, List(event))
-    }
+        ),
+    )
   }
 
 object KafkaBookInstanceAddedToCatalogueEventPublisherSuite

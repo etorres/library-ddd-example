@@ -5,7 +5,7 @@ import book.infrastructure.BookInstanceGenerators.bookIdGen
 import book.model.BookType
 import lending.model.Book.AvailableBook
 import lending.model.BookStateChanged.*
-import lending.model.{BookStateChanged, LibraryBranchId, PatronId}
+import lending.model.{BookDuplicateHoldFound, BookStateChanged, LibraryBranchId, PatronId}
 import shared.infrastructure.TimeGenerators.instantArbitrary
 import shared.refined.types.infrastructure.RefinedTypesGenerators.eventIdGen
 
@@ -85,3 +85,19 @@ object LendingGenerators:
       1 -> bookPlacedOnHoldGen,
       1 -> bookReturnedGen,
     )
+
+  val bookDuplicateHoldFoundGen: Gen[BookDuplicateHoldFound] = for
+    eventId <- eventIdGen
+    when <- instantArbitrary.arbitrary
+    firstPatronId <- patronIdGen
+    secondPatronId <- patronIdGen
+    libraryBranchId <- libraryBranchIdGen
+    bookId <- bookIdGen
+  yield BookDuplicateHoldFound(
+    eventId,
+    when,
+    firstPatronId,
+    secondPatronId,
+    libraryBranchId,
+    bookId,
+  )

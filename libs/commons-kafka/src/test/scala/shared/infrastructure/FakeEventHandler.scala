@@ -1,12 +1,14 @@
 package es.eriktorr.library
 package shared.infrastructure
 
+import shared.DomainEvent
 import shared.infrastructure.FakeEventHandler.EventHandlerState
 
 import cats.effect.{IO, Ref}
 import fs2.Stream
 
-final class FakeEventHandler[A](stateRef: Ref[IO, EventHandlerState[A]]) extends EventHandler[A]:
+final class FakeEventHandler[A <: DomainEvent](stateRef: Ref[IO, EventHandlerState[A]])
+    extends EventHandler[A]:
   override def handleWith(f: A => IO[Unit]): Stream[IO, Unit] =
     Stream.exec(
       for
