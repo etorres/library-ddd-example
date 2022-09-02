@@ -24,8 +24,8 @@ final case class LendingConfiguration(
   def asString: String =
     s"""
        |jdbc-lending: ${jdbcConfig.asString}, 
-       |kafka-book-instances: ${bookInstancesKafkaConfig.asString}
-       |kafka-book-state-changes: ${bookStateChangesKafkaConfig.asString}
+       |kafka-book-instances: ${bookInstancesKafkaConfig.asString}, 
+       |kafka-book-state-changes: ${bookStateChangesKafkaConfig.asString}, 
        |kafka-book-state-errors: ${bookStateErrorsKafkaConfig.asString}""".stripMargin
       .replaceAll("\\R", "")
       .nn
