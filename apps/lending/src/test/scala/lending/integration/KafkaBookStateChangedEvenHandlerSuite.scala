@@ -1,14 +1,10 @@
 package es.eriktorr.library
 package lending.integration
 
-import book.infrastructure.BookInstanceGenerators.bookInstanceAddedToCatalogueGen
-import book.infrastructure.BookInstanceAddedToCatalogueAvroCodec
-import book.model.BookInstanceAddedToCatalogue
-import lending.infrastructure.KafkaBookInstanceAddedToCatalogueEventHandler
-import lending.integration.KafkaBookInstanceAddedToCatalogueEventHandlerSuite.{
-  bookInstanceAddedToCatalogueAvroCodec,
-  logger,
-}
+import lending.infrastructure.LendingGenerators.bookStateChangedGen
+import lending.infrastructure.{BookStateChangedAvroCodec, KafkaBookStateChangedEvenHandler}
+import lending.integration.KafkaBookStateChangedEvenHandlerSuite.{bookStateChangedAvroCodec, logger}
+import lending.model.BookStateChanged
 import shared.infrastructure.FakeEventHandler.EventHandlerState
 import shared.infrastructure.{KafkaClientsSuite, KafkaTestConfig}
 
@@ -20,15 +16,14 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration.*
 
-final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
-    extends KafkaClientsSuite[BookInstanceAddedToCatalogue]:
-  override def kafkaTestConfig: KafkaTestConfig = KafkaTestConfig.LendingBookInstances
+final class KafkaBookStateChangedEvenHandlerSuite extends KafkaClientsSuite[BookStateChanged]:
+  override def kafkaTestConfig: KafkaTestConfig = KafkaTestConfig.LendingBookStateChanges
 
-  test("should handle new book instance added event in a kafka topic") {
-    forAllF(bookInstanceAddedToCatalogueGen) { event =>
+  test("should handle book state changed event in a kafka topic") {
+    forAllF(bookStateChangedGen) { event =>
       val (consumer, producer) = kafkaClientsFixture()
       for
-        stateRef <- Ref.of[IO, EventHandlerState[BookInstanceAddedToCatalogue]](
+        stateRef <- Ref.of[IO, EventHandlerState[BookStateChanged]](
           EventHandlerState.empty,
         )
         _ <- producer.produce(
@@ -36,7 +31,7 @@ final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
             ProducerRecord(kafkaTestConfig.kafkaConfig.topic.value, event.eventId.asString, event),
           ),
         )
-        eventHandler = KafkaBookInstanceAddedToCatalogueEventHandler(consumer)
+        eventHandler = KafkaBookStateChangedEvenHandler(consumer)
         _ <- eventHandler
           .handleWith(event =>
             stateRef.update(currentState => currentState.copy(event :: currentState.events)),
@@ -50,6 +45,5 @@ final class KafkaBookInstanceAddedToCatalogueEventHandlerSuite
     }
   }
 
-object KafkaBookInstanceAddedToCatalogueEventHandlerSuite
-    extends BookInstanceAddedToCatalogueAvroCodec:
+object KafkaBookStateChangedEvenHandlerSuite extends BookStateChangedAvroCodec:
   given logger: Logger[IO] = Slf4jLogger.getLogger[IO]

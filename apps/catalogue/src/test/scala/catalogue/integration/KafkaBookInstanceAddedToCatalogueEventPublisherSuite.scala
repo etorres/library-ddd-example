@@ -22,7 +22,7 @@ import scala.concurrent.duration.*
 
 final class KafkaBookInstanceAddedToCatalogueEventPublisherSuite
     extends KafkaClientsSuite[BookInstanceAddedToCatalogue]:
-  override def kafkaTestConfig: KafkaTestConfig = KafkaTestConfig.Catalogue
+  override def kafkaTestConfig: KafkaTestConfig = KafkaTestConfig.CatalogueBookInstances
 
   test("should publish events to a topic in kafka") {
     forAllF(bookInstanceAddedToCatalogueGen) { event =>
