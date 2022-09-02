@@ -18,10 +18,6 @@ final class ReactToBookStateChangedSuite extends CatsEffectSuite with ScalaCheck
       ReactToBookStateChangedSuiteRunner
         .runWith(testCase.initialState)(_.handle.compile.drain)
         .map { case (result, finalState) =>
-          // TODO
-          println(s"\n\n >> FINAL    : $finalState\n")
-          println(s"\n\n >> EXPECTED : ${testCase.expectedState}\n")
-          // TODO
           assert(result.isRight)
           assertEquals(finalState, testCase.expectedState)
         }

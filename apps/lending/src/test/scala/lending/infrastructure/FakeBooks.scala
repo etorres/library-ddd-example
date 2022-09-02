@@ -9,15 +9,15 @@ import cats.effect.{IO, Ref}
 
 final class FakeBooks(stateRef: Ref[IO, BooksState]) extends Books:
   override def save(book: Book): IO[Unit] =
-    stateRef.update(currentState => currentState.copy(book :: currentState.books))
+    stateRef.update(currentState => currentState.copy(currentState.books + (book.bookId -> book)))
 
   override def findBy(bookId: BookId): IO[Option[Book]] =
-    stateRef.get.map(_.books.find(_.bookId == bookId))
+    stateRef.get.map(_.books.get(bookId))
 
 object FakeBooks:
-  final case class BooksState(books: List[Book]):
+  final case class BooksState(books: Map[BookId, Book]):
     def set(newBooks: List[Book]): BooksState =
-      copy(books = newBooks)
+      copy(books = newBooks.map(x => x.bookId -> x).toMap)
 
   object BooksState:
-    def empty: BooksState = BooksState(List.empty)
+    def empty: BooksState = BooksState(Map.empty)
