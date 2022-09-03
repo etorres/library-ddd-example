@@ -40,7 +40,7 @@ object LendingGenerators:
   val bookGen: Gen[Book] =
     Gen.frequency(1 -> availableBookGen, 1 -> bookOnHoldGen, 1 -> checkedOutBookGen)
 
-  private[this] val bookCheckedOutGen: Gen[BookCheckedOut] = for
+  val bookCheckedOutGen: Gen[BookCheckedOut] = for
     eventId <- eventIdGen
     when <- instantArbitrary.arbitrary
     patronId <- patronIdGen
@@ -50,7 +50,7 @@ object LendingGenerators:
     till <- instantArbitrary.arbitrary
   yield BookCheckedOut(eventId, when, patronId, bookId, bookType, libraryBranchId, till)
 
-  private[this] val bookHoldCanceledGen: Gen[BookHoldCanceled] = for
+  val bookHoldCanceledGen: Gen[BookHoldCanceled] = for
     eventId <- eventIdGen
     when <- instantArbitrary.arbitrary
     patronId <- patronIdGen
@@ -58,7 +58,7 @@ object LendingGenerators:
     libraryBranchId <- libraryBranchIdGen
   yield BookHoldCanceled(eventId, when, patronId, bookId, libraryBranchId)
 
-  private[this] val bookHoldExpiredGen: Gen[BookHoldExpired] = for
+  val bookHoldExpiredGen: Gen[BookHoldExpired] = for
     eventId <- eventIdGen
     when <- instantArbitrary.arbitrary
     patronId <- patronIdGen
@@ -86,7 +86,7 @@ object LendingGenerators:
     holdTill,
   )
 
-  private[this] val bookReturnedGen: Gen[BookReturned] = for
+  val bookReturnedGen: Gen[BookReturned] = for
     eventId <- eventIdGen
     when <- instantArbitrary.arbitrary
     patronId <- patronIdGen

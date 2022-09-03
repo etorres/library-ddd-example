@@ -1,16 +1,12 @@
 package es.eriktorr.library
 package lending.acceptance
 
-import lending.acceptance.ReactToBookStateChangedSuite.{
-  availableBookIsPlacedOnHold,
-  bookPlacedOnHoldAlreadyByOtherPatron,
-  bookPlacedOnHoldAlreadyBySamePatron,
-  TestCase,
-}
-import lending.infrastructure.LendingGenerators.{bookPlacedOnHoldGen, patronIdGen}
+import book.model.BookType
+import lending.acceptance.ReactToBookStateChangedSuite.*
+import lending.infrastructure.LendingGenerators.*
 import lending.infrastructure.ReactToBookStateChangedSuiteRunner
 import lending.infrastructure.ReactToBookStateChangedSuiteRunner.ReactToBookStateChangedState
-import lending.model.Book.{AvailableBook, BookOnHold}
+import lending.model.Book.{AvailableBook, BookOnHold, CheckedOutBook}
 import lending.model.BookDuplicateHoldFound
 import shared.infrastructure.CollectionGenerators.nDistinct
 import shared.infrastructure.TimeGenerators.instantArbitrary
@@ -22,7 +18,17 @@ import org.scalacheck.effect.PropF.forAllF
 
 final class ReactToBookStateChangedSuite extends CatsEffectSuite with ScalaCheckEffectSuite:
 
-  override def scalaCheckInitialSeed = "hcbRdRD62Ofg0izgSBhvXt8ZOOWOf1vvEi_gD0S0IQE=" // TODO
+  test("should checked out a book on hold") {
+    checkUsing(bookOnHoldIsCheckedOut)
+  }
+
+  test("should make available a book on hold by canceling the hold") {
+    checkUsing(bookHoldIsCanceled)
+  }
+
+  test("should make available a book on hold when the hold expires") {
+    checkUsing(bookHoldExpired)
+  }
 
   test("should place an available book on hold") {
     checkUsing(availableBookIsPlacedOnHold)
@@ -40,20 +46,8 @@ final class ReactToBookStateChangedSuite extends CatsEffectSuite with ScalaCheck
     checkUsing(bookPlacedOnHoldAlreadyByOtherPatron)
   }
 
-  test("should checked out a book on hold") {
-    fail("not implemented")
-  }
-
-  test("should make available a book on hold by canceling the hold") {
-    fail("not implemented")
-  }
-
-  test("should make available a book on hold when the hold expires") {
-    fail("not implemented")
-  }
-
   test("should make available a book on hold when the book is returned") {
-    fail("not implemented")
+    checkUsing(bookOnHoldIsReturned)
   }
 
   test("should do nothing when the state change is illegal") {
@@ -74,6 +68,60 @@ object ReactToBookStateChangedSuite:
       initialState: ReactToBookStateChangedState,
       expectedState: ReactToBookStateChangedState,
   )
+
+  final private val bookOnHoldIsCheckedOut: Gen[TestCase] = for
+    bookCheckedOut <- bookCheckedOutGen
+    holdTill <- Gen.option(instantArbitrary.arbitrary)
+    bookOnHold = BookOnHold(
+      bookCheckedOut.bookId,
+      bookCheckedOut.bookType,
+      bookCheckedOut.libraryBranchId,
+      bookCheckedOut.patronId,
+      holdTill,
+    )
+    initialState = ReactToBookStateChangedState.empty
+      .setEvents(List(bookCheckedOut))
+      .setBooks(List(bookOnHold))
+    expectedState = initialState.clearEvents.setBooks(List(CheckedOutBook.from(bookCheckedOut)))
+  yield TestCase(initialState, expectedState)
+
+  final private val bookHoldIsCanceled: Gen[TestCase] = for
+    bookHoldCanceled <- bookHoldCanceledGen
+    bookType <- Gen.oneOf(BookType.values.toList)
+    holdTill <- Gen.option(instantArbitrary.arbitrary)
+    bookOnHold = BookOnHold(
+      bookHoldCanceled.bookId,
+      bookType,
+      bookHoldCanceled.libraryBranchId,
+      bookHoldCanceled.patronId,
+      holdTill,
+    )
+    initialState = ReactToBookStateChangedState.empty
+      .setEvents(List(bookHoldCanceled))
+      .setBooks(List(bookOnHold))
+    expectedState = initialState.clearEvents.setBooks(
+      List(AvailableBook.from(bookOnHold, bookHoldCanceled)),
+    )
+  yield TestCase(initialState, expectedState)
+
+  final private val bookHoldExpired: Gen[TestCase] = for
+    bookHoldExpired <- bookHoldExpiredGen
+    bookType <- Gen.oneOf(BookType.values.toList)
+    holdTill <- Gen.option(instantArbitrary.arbitrary)
+    bookOnHold = BookOnHold(
+      bookHoldExpired.bookId,
+      bookType,
+      bookHoldExpired.libraryBranchId,
+      bookHoldExpired.patronId,
+      holdTill,
+    )
+    initialState = ReactToBookStateChangedState.empty
+      .setEvents(List(bookHoldExpired))
+      .setBooks(List(bookOnHold))
+    expectedState = initialState.clearEvents.setBooks(
+      List(AvailableBook.from(bookOnHold, bookHoldExpired)),
+    )
+  yield TestCase(initialState, expectedState)
 
   final private val availableBookIsPlacedOnHold: Gen[TestCase] = for
     bookPlacedOnHold <- bookPlacedOnHoldGen()
@@ -129,5 +177,23 @@ object ReactToBookStateChangedSuite:
       .setUUIDs(List(eventId.value))
     expectedState = initialState.clearEvents.clearInstants.clearUUIDs.setErrors(
       List(BookDuplicateHoldFound.from(eventId, when, bookOnHold, bookPlacedOnHold)),
+    )
+  yield TestCase(initialState, expectedState)
+
+  final private val bookOnHoldIsReturned: Gen[TestCase] = for
+    bookReturned <- bookReturnedGen
+    holdTill <- Gen.option(instantArbitrary.arbitrary)
+    bookOnHold = BookOnHold(
+      bookReturned.bookId,
+      bookReturned.bookType,
+      bookReturned.libraryBranchId,
+      bookReturned.patronId,
+      holdTill,
+    )
+    initialState = ReactToBookStateChangedState.empty
+      .setEvents(List(bookReturned))
+      .setBooks(List(bookOnHold))
+    expectedState = initialState.clearEvents.setBooks(
+      List(AvailableBook.from(bookOnHold, bookReturned)),
     )
   yield TestCase(initialState, expectedState)
