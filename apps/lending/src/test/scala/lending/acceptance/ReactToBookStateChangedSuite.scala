@@ -7,7 +7,7 @@ import lending.infrastructure.LendingGenerators.*
 import lending.infrastructure.ReactToBookStateChangedSuiteRunner
 import lending.infrastructure.ReactToBookStateChangedSuiteRunner.ReactToBookStateChangedState
 import lending.model.Book.{AvailableBook, BookOnHold, CheckedOutBook}
-import lending.model.BookDuplicateHoldFound
+import lending.model.{Book, BookDuplicateHoldFound, BookStateChanged}
 import shared.infrastructure.CollectionGenerators.nDistinct
 import shared.infrastructure.TimeGenerators.instantArbitrary
 import shared.refined.types.infrastructure.RefinedTypesGenerators.eventIdGen
@@ -51,7 +51,7 @@ final class ReactToBookStateChangedSuite extends CatsEffectSuite with ScalaCheck
   }
 
   test("should do nothing when the state change is illegal") {
-    fail("not implemented")
+    checkUsing(illegalBookStateChange)
   }
 
   private[this] def checkUsing(testCaseGen: Gen[TestCase]) = forAllF(testCaseGen) { testCase =>
@@ -196,4 +196,96 @@ object ReactToBookStateChangedSuite:
     expectedState = initialState.clearEvents.setBooks(
       List(AvailableBook.from(bookOnHold, bookReturned)),
     )
+  yield TestCase(initialState, expectedState)
+
+  final private[this] val illegalBookCheckedOut: Gen[(BookStateChanged, Book)] = for
+    bookCheckedOut <- bookCheckedOutGen
+    book <- Gen.frequency(
+      1 -> AvailableBook(
+        bookCheckedOut.bookId,
+        bookCheckedOut.bookType,
+        bookCheckedOut.libraryBranchId,
+      ),
+      1 -> CheckedOutBook(
+        bookCheckedOut.bookId,
+        bookCheckedOut.bookType,
+        bookCheckedOut.libraryBranchId,
+        bookCheckedOut.patronId,
+      ),
+    )
+  yield (bookCheckedOut, book)
+
+  final private[this] val illegalBookHoldCanceled: Gen[(BookStateChanged, Book)] = for
+    bookHoldCanceled <- bookHoldCanceledGen
+    bookType <- Gen.oneOf(BookType.values.toList)
+    book <- Gen.frequency(
+      1 -> AvailableBook(
+        bookHoldCanceled.bookId,
+        bookType,
+        bookHoldCanceled.libraryBranchId,
+      ),
+      1 -> CheckedOutBook(
+        bookHoldCanceled.bookId,
+        bookType,
+        bookHoldCanceled.libraryBranchId,
+        bookHoldCanceled.patronId,
+      ),
+    )
+  yield (bookHoldCanceled, book)
+
+  final private[this] val illegalBookHoldExpired: Gen[(BookStateChanged, Book)] = for
+    bookHoldExpired <- bookHoldExpiredGen
+    bookType <- Gen.oneOf(BookType.values.toList)
+    book <- Gen.frequency(
+      1 -> AvailableBook(
+        bookHoldExpired.bookId,
+        bookType,
+        bookHoldExpired.libraryBranchId,
+      ),
+      1 -> CheckedOutBook(
+        bookHoldExpired.bookId,
+        bookType,
+        bookHoldExpired.libraryBranchId,
+        bookHoldExpired.patronId,
+      ),
+    )
+  yield (bookHoldExpired, book)
+
+  final private[this] val illegalBookPlacedOnHold: Gen[(BookStateChanged, Book)] = for
+    bookPlacedOnHold <- bookPlacedOnHoldGen()
+    book = CheckedOutBook(
+      bookPlacedOnHold.bookId,
+      bookPlacedOnHold.bookType,
+      bookPlacedOnHold.libraryBranchId,
+      bookPlacedOnHold.patronId,
+    )
+  yield (bookPlacedOnHold, book)
+
+  final private[this] val illegalBookReturned: Gen[(BookStateChanged, Book)] = for
+    bookReturned <- bookReturnedGen
+    book <- Gen.frequency(
+      1 -> AvailableBook(
+        bookReturned.bookId,
+        bookReturned.bookType,
+        bookReturned.libraryBranchId,
+      ),
+      1 -> CheckedOutBook(
+        bookReturned.bookId,
+        bookReturned.bookType,
+        bookReturned.libraryBranchId,
+        bookReturned.patronId,
+      ),
+    )
+  yield (bookReturned, book)
+
+  final private val illegalBookStateChange: Gen[TestCase] = for
+    (event, book) <- Gen.frequency(
+      1 -> illegalBookCheckedOut,
+      1 -> illegalBookHoldCanceled,
+      1 -> illegalBookHoldExpired,
+      1 -> illegalBookPlacedOnHold,
+      1 -> illegalBookReturned,
+    )
+    initialState = ReactToBookStateChangedState.empty.setBooks(List(book)).setEvents(List(event))
+    expectedState = initialState.clearEvents
   yield TestCase(initialState, expectedState)
