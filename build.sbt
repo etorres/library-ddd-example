@@ -68,6 +68,8 @@ lazy val lending =
       fs2Core,
       fs2Kafka,
       hikariCP,
+      http4sDsl,
+      http4sEmberServer,
       log4catsCore,
       log4catsSlf4j,
       typename,
@@ -92,6 +94,30 @@ lazy val `book-instance` =
     .mainDependencies(catsCore)
     .optionalDependencies(avro, catsFree, doobieCore, doobiePostgres, typename, vulcan)
     .testDependencies(log4jApi, log4jCore, log4jSlf4jImpl, munit, scalacheck)
+
+lazy val `commons-http` =
+  project
+    .library("commons-http")
+    .dependsOn(`commons-lang` % "test->test;compile->compile")
+    .mainDependencies(
+      catsCore,
+      catsEffect,
+      catsEffectKernel,
+      caseInsensitive,
+      ciris,
+      fs2Core,
+      ip4sCore,
+      http4sCore,
+      http4sEmberServer,
+      http4sServer,
+    )
+    .testDependencies(
+      munit,
+      munitCatsEffect,
+      munitScalacheck,
+      scalacheckEffect,
+      scalacheckEffectMunit,
+    )
 
 lazy val `commons-jdbc` =
   project

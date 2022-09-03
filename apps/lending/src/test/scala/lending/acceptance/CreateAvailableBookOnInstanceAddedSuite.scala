@@ -18,7 +18,7 @@ final class CreateAvailableBookOnInstanceAddedSuite
     extends CatsEffectSuite
     with ScalaCheckEffectSuite:
 
-  test("should create an available book when a new books instance is added") {
+  test("should create new available book for lending when book instance was added to catalogue") {
     forAllF(testCaseGen) { testCase =>
       CreateAvailableBookOnInstanceAddedSuiteRunner
         .runWith(testCase.initialState)(

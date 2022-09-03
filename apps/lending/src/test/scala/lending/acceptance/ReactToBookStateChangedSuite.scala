@@ -35,13 +35,13 @@ final class ReactToBookStateChangedSuite extends CatsEffectSuite with ScalaCheck
   }
 
   test(
-    "should do nothing when a patron try to place on hold a book placed on hold already by themself",
+    "should not raise anything if book is on hold by the same patron",
   ) {
     checkUsing(bookPlacedOnHoldAlreadyBySamePatron)
   }
 
   test(
-    "should raise a duplicate hold error when a different patron has the book placed on hold already",
+    "should raise duplicate hold found event when someone placed on hold book already on hold",
   ) {
     checkUsing(bookPlacedOnHoldAlreadyByOtherPatron)
   }

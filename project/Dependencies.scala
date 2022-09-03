@@ -25,11 +25,25 @@ trait Cats {
   val kittens = organization %% "kittens" % kittensVersion
 }
 
+trait CaseInsensitive {
+  private[this] val organization = "org.typelevel"
+  private[this] val version = "1.3.0"
+
+  val caseInsensitive = organization %% "case-insensitive" % version
+}
+
 trait Ciris {
   private[this] val organization = "is.cir"
   private[this] val version = "2.3.3"
 
   val ciris = organization %% "ciris" % version
+}
+
+trait Circe {
+  private[this] val organization = "io.circe"
+  private[this] val version = "0.14.2"
+
+  val circeCore = organization %% "circe-core" % version
 }
 
 trait Doobie {
@@ -65,6 +79,25 @@ trait Hikari {
   private[this] val version = "5.0.1"
 
   val hikariCP = (organization % "HikariCP" % version).exclude("org.slf4j", "slf4j-api")
+}
+
+trait Http4s {
+  private[this] val organization = "org.http4s"
+
+  private[this] val version = "0.23.15"
+
+  val http4sCirce = organization %% "http4s-circe" % version
+  val http4sCore = organization %% "http4s-core" % version
+  val http4sDsl = organization %% "http4s-dsl" % version
+  val http4sEmberServer = organization %% "http4s-ember-server" % version
+  val http4sServer = organization %% "http4s-server" % version
+}
+
+trait Ip4s {
+  private[this] val organization = "com.comcast"
+  private[this] val version = "3.1.3"
+
+  val ip4sCore = organization %% "ip4s-core" % version
 }
 
 trait Log4cats {
@@ -138,11 +171,15 @@ trait Vulcan {
 object Dependencies
     extends Avro
     with Cats
+    with CaseInsensitive
     with Ciris
+    with Circe
     with Doobie
     with Fs2
     with Fs2Kafka
     with Hikari
+    with Http4s
+    with Ip4s
     with Log4cats
     with Log4j
     with Munit

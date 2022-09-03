@@ -1,0 +1,4 @@
+package es.eriktorr.library
+package shared.infrastructure
+
+trait HttpServerConfigConfigDecoder extends HostConfigDecoder with PortConfigDecoder
