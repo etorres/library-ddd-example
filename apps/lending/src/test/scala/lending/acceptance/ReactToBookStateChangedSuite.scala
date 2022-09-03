@@ -18,19 +18,19 @@ import org.scalacheck.effect.PropF.forAllF
 
 final class ReactToBookStateChangedSuite extends CatsEffectSuite with ScalaCheckEffectSuite:
 
-  test("should checked out a book on hold") {
+  test("should check out book which is marked as placed on hold in the system") {
     checkUsing(bookOnHoldIsCheckedOut)
   }
 
-  test("should make available a book on hold by canceling the hold") {
+  test("should make book available when hold canceled") {
     checkUsing(bookHoldIsCanceled)
   }
 
-  test("should make available a book on hold when the hold expires") {
+  test("should make book available when hold expired") {
     checkUsing(bookHoldExpired)
   }
 
-  test("should place an available book on hold") {
+  test("should place on hold book which is marked as available in the system") {
     checkUsing(availableBookIsPlacedOnHold)
   }
 
@@ -46,7 +46,7 @@ final class ReactToBookStateChangedSuite extends CatsEffectSuite with ScalaCheck
     checkUsing(bookPlacedOnHoldAlreadyByOtherPatron)
   }
 
-  test("should make available a book on hold when the book is returned") {
+  test("should return book which is marked as placed on hold in the system") {
     checkUsing(bookOnHoldIsReturned)
   }
 
