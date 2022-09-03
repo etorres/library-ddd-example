@@ -66,7 +66,7 @@ object LendingGenerators:
     libraryBranchId <- libraryBranchIdGen
   yield BookHoldExpired(eventId, when, patronId, bookId, libraryBranchId)
 
-  val bookPlacedOnHoldGen: Gen[BookPlacedOnHold] = for
+  def bookPlacedOnHoldGen(patronIdGen: Gen[PatronId] = patronIdGen): Gen[BookPlacedOnHold] = for
     eventId <- eventIdGen
     when <- instantArbitrary.arbitrary
     patronId <- patronIdGen
@@ -100,7 +100,7 @@ object LendingGenerators:
       1 -> bookCheckedOutGen,
       1 -> bookHoldCanceledGen,
       1 -> bookHoldExpiredGen,
-      1 -> bookPlacedOnHoldGen,
+      1 -> bookPlacedOnHoldGen(),
       1 -> bookReturnedGen,
     )
 
