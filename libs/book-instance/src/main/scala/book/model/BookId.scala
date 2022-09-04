@@ -18,4 +18,6 @@ object BookId:
     Try(UUID.fromString(value))
       .fold(error => UUIDInvalidFormat(error).invalidNec[UUID], _.nn.validNec)
 
-  extension (bookId: BookId) def value: UUID = bookId
+  extension (bookId: BookId)
+    def value: UUID = bookId
+    def asString: String = bookId.value.toString

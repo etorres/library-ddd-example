@@ -44,6 +44,10 @@ trait Circe {
   private[this] val version = "0.14.2"
 
   val circeCore = organization %% "circe-core" % version
+  // Optional for auto-derivation of JSON codecs
+  val circeGeneric = organization %% "circe-generic" % version
+  // Optional for string interpolation to JSON model
+  val circeLiteral = organization %% "circe-literal" % version
 }
 
 trait Doobie {

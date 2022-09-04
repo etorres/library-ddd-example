@@ -6,7 +6,15 @@ sbtSettings
 lazy val `library-ddd-example` =
   project
     .root("library-ddd-example")
-    .aggregate(`book-instance`, catalogue, `commons-jdbc`, `commons-kafka`, `commons-lang`, lending)
+    .aggregate(
+      `book-instance`,
+      catalogue,
+      `commons-http`,
+      `commons-jdbc`,
+      `commons-kafka`,
+      `commons-lang`,
+      lending,
+    )
 
 lazy val catalogue = project
   .application("catalogue")
@@ -49,6 +57,7 @@ lazy val lending =
     .application("lending")
     .dependsOn(
       `book-instance` % "test->test;compile->compile",
+      `commons-http` % "test->test;compile->compile",
       `commons-jdbc` % "test->test;compile->compile",
       `commons-kafka` % "test->test;compile->compile",
       `commons-lang` % "test->test;compile->compile",
@@ -61,6 +70,8 @@ lazy val lending =
       catsEffectStd,
       catsFree,
       catsKernel,
+      circeCore,
+      circeGeneric,
       ciris,
       doobieCore,
       doobieFree,
@@ -68,6 +79,8 @@ lazy val lending =
       fs2Core,
       fs2Kafka,
       hikariCP,
+      http4sCore,
+      http4sCirce,
       http4sDsl,
       http4sEmberServer,
       log4catsCore,
@@ -104,9 +117,11 @@ lazy val `commons-http` =
       catsEffect,
       catsEffectKernel,
       caseInsensitive,
+      circeCore,
       ciris,
       fs2Core,
       ip4sCore,
+      http4sCirce,
       http4sCore,
       http4sEmberServer,
       http4sServer,
@@ -169,7 +184,7 @@ lazy val `commons-lang` =
   project
     .library("commons-lang")
     .mainDependencies(catsCore, catsEffect, catsEffectKernel)
-    .optionalDependencies(avro, vulcan)
+    .optionalDependencies(avro, circeCore, vulcan)
     .testDependencies(
       munit,
       munitCatsEffect,

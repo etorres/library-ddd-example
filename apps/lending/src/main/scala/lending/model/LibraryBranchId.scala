@@ -18,6 +18,8 @@ object LibraryBranchId:
     Try(UUID.fromString(value))
       .fold(error => UUIDInvalidFormat(error).invalidNec[UUID], _.nn.validNec)
 
-  extension (libraryBranchId: LibraryBranchId) def value: UUID = libraryBranchId
+  extension (libraryBranchId: LibraryBranchId) 
+    def value: UUID = libraryBranchId
+    def asString: String = libraryBranchId.value.toString
 
   val nil: LibraryBranchId = from(UUID.fromString("00000000-0000-0000-0000-000000000000").nn)
