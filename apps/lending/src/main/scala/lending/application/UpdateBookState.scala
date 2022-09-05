@@ -7,7 +7,7 @@ import lending.application.UpdateBookState.{
   ApiRootPath,
   PatronIdVar,
 }
-import lending.model.{Books, BookStateChanged, PatronId}
+import lending.model.{Books, BookStateChanged, PatronId, Patrons}
 import shared.EventId
 import shared.RESTful.{apiPathPrefix, apiVersion}
 import shared.infrastructure.{EventIdJsonCodec, EventPublisher}
@@ -19,7 +19,7 @@ import org.http4s.circe.*
 import org.http4s.dsl.io.*
 import org.http4s.{EntityDecoder, HttpApp, HttpRoutes, Request}
 
-final class UpdateBookState(eventSender: EventPublisher[BookStateChanged])(using
+final class UpdateBookState(eventSender: EventPublisher[BookStateChanged], patrons: Patrons)(using
     uuidGenerator: UUIDGen[IO],
 ):
   val httpApp: HttpApp[IO] = HttpRoutes
@@ -30,6 +30,7 @@ final class UpdateBookState(eventSender: EventPublisher[BookStateChanged])(using
 
   private[this] def placeHold(patronId: PatronId, request: Request[IO]) = for
     placeHoldRequest <- request.as[PlaceHoldRequest]
+    patron <- patrons.findBy(patronId)
     eventId <- uuidGenerator.randomUUID.map(EventId.from)
     response <- Created(eventId.asJson.noSpaces)
   yield response

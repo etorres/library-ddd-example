@@ -9,6 +9,7 @@ import lending.model.*
 import lending.model.Book.{AvailableBook, BookOnHold, CheckedOutBook}
 import lending.model.BookState.{Available, CheckedOut, OnHold}
 import shared.ValidationError
+import shared.infrastructure.InvalidDatabaseEntity
 import shared.validated.AllErrorsOr
 import shared.validated.ValidatedIO.validatedNecIO
 
@@ -90,8 +91,6 @@ object JdbcBooks:
       with BookTypeJdbcMapping
       with LibraryBranchIdJdbcMapping
       with PatronIdJdbcMapping
-
-  final case class InvalidDatabaseEntity(message: String) extends ValidationError(message)
 
   final case class RawBook(
       bookId: BookId,

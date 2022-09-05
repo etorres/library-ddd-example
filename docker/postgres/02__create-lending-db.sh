@@ -26,6 +26,23 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
           checked_out_by_patron UUID,
           on_hold_till TIMESTAMPTZ
         )';
+        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || quote_ident(schema_name) || '.patrons (
+          patron_id UUID PRIMARY KEY,
+          patron_type VARCHAR(32) NOT NULL
+        )';
+        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || quote_ident(schema_name) || '.holds (
+          book_id UUID NOT NULL REFERENCES ' || quote_ident(schema_name) || '.books ON DELETE RESTRICT,
+          patron_id UUID NOT NULL REFERENCES ' || quote_ident(schema_name) || '.patrons ON DELETE RESTRICT,
+          library_branch_id UUID NOT NULL,
+          till TIMESTAMPTZ NOT NULL,
+          PRIMARY KEY (book_id, patron_id, library_branch_id)
+        )';
+        EXECUTE 'CREATE TABLE IF NOT EXISTS ' || quote_ident(schema_name) || '.overdue_checkouts (
+          book_id UUID NOT NULL REFERENCES ' || quote_ident(schema_name) || '.books ON DELETE RESTRICT,
+          patron_id UUID NOT NULL REFERENCES ' || quote_ident(schema_name) || '.patrons ON DELETE RESTRICT,
+          library_branch_id UUID NOT NULL,
+          PRIMARY KEY (book_id, patron_id, library_branch_id)
+        )';
       END LOOP;
     END\$\$;
 EOSQL
