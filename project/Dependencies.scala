@@ -25,6 +25,13 @@ trait Cats {
   val kittens = organization %% "kittens" % kittensVersion
 }
 
+trait CatsScalaCheck {
+  private[this] val organization = "io.chrisdavenport"
+  private[this] val version = "0.3.1"
+
+  val catsScalaCheck = organization %% "cats-scalacheck" % version
+}
+
 trait CaseInsensitive {
   private[this] val organization = "org.typelevel"
   private[this] val version = "1.3.0"
@@ -175,6 +182,7 @@ trait Vulcan {
 object Dependencies
     extends Avro
     with Cats
+    with CatsScalaCheck
     with CaseInsensitive
     with Ciris
     with Circe

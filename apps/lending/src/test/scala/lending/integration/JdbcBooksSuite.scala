@@ -13,7 +13,7 @@ import org.scalacheck.Gen
 import org.scalacheck.effect.PropF.forAllF
 
 final class JdbcBooksSuite extends JdbcTransactorsSuite:
-  override def jdbcTestConfig: JdbcTestConfig = JdbcTestConfig.Lending
+  override def jdbcTestConfig: JdbcTestConfig = JdbcTestConfig.LendingBooks
 
   test("should create and update a book in the lending database") {
     forAllF(testCaseGen) { case TestCase(book, updatedBook) =>
@@ -30,10 +30,10 @@ object JdbcBooksSuite:
   final private case class TestCase(book: Book, updatedBook: Book)
 
   private val testCaseGen: Gen[TestCase] = for
-    book <- bookGen
+    book <- bookGen()
     patronId <- patronIdGen
     holdTill <- Gen.option(instantArbitrary.arbitrary)
-    updatedBook <- bookGen.map { otherBook =>
+    updatedBook <- bookGen().map { otherBook =>
       otherBook match
         case AvailableBook(_, bookType, libraryBranchId) =>
           BookOnHold(book.bookId, bookType, libraryBranchId, patronId, holdTill)

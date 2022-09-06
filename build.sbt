@@ -91,6 +91,7 @@ lazy val lending =
     )
     .unusedCompileDependencies(doobiePostgres, log4jApi, log4jCore, log4jSlf4jImpl)
     .testDependencies(
+      catsScalaCheck,
       fs2kafkaVulcanTestkitMunit,
       munit,
       munitCatsEffect,

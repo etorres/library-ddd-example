@@ -9,7 +9,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     \connect lending_db lending_user
     DO \$\$
     DECLARE
-      schema_names TEXT[] := ARRAY['public', 'test_lending'];
+      schema_names TEXT[] := ARRAY['public', 'test_lending_books', 'test_lending_patrons'];
       schema_name TEXT;
     BEGIN
       FOREACH schema_name IN ARRAY schema_names

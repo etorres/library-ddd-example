@@ -2,7 +2,7 @@ package es.eriktorr.library
 package lending.infrastructure
 
 import book.infrastructure.BookInstanceGenerators.bookIdGen
-import book.model.BookType
+import book.model.{BookId, BookType}
 import lending.model.*
 import lending.model.Book.{AvailableBook, BookOnHold, CheckedOutBook}
 import lending.model.BookStateChanged.*
@@ -16,13 +16,13 @@ object LendingGenerators:
 
   val patronIdGen: Gen[PatronId] = Gen.uuid.map(PatronId.from)
 
-  private[this] val availableBookGen: Gen[AvailableBook] = for
+  private[this] def availableBookGen(bookIdGen: Gen[BookId]): Gen[AvailableBook] = for
     bookId <- bookIdGen
     bookType <- Gen.oneOf(BookType.values.toList)
     libraryBranchId <- libraryBranchIdGen
   yield AvailableBook(bookId, bookType, libraryBranchId)
 
-  private[this] val bookOnHoldGen: Gen[BookOnHold] = for
+  private[this] def bookOnHoldGen(bookIdGen: Gen[BookId]): Gen[BookOnHold] = for
     bookId <- bookIdGen
     bookType <- Gen.oneOf(BookType.values.toList)
     holdPlacedAt <- libraryBranchIdGen
@@ -30,15 +30,19 @@ object LendingGenerators:
     holdTill <- Gen.option(instantArbitrary.arbitrary)
   yield BookOnHold(bookId, bookType, holdPlacedAt, byPatron, holdTill)
 
-  private[this] val checkedOutBookGen: Gen[CheckedOutBook] = for
+  private[this] def checkedOutBookGen(bookIdGen: Gen[BookId]): Gen[CheckedOutBook] = for
     bookId <- bookIdGen
     bookType <- Gen.oneOf(BookType.values.toList)
     checkedOutAt <- libraryBranchIdGen
     byPatron <- patronIdGen
   yield CheckedOutBook(bookId, bookType, checkedOutAt, byPatron)
 
-  val bookGen: Gen[Book] =
-    Gen.frequency(1 -> availableBookGen, 1 -> bookOnHoldGen, 1 -> checkedOutBookGen)
+  def bookGen(bookIdGen: Gen[BookId] = bookIdGen): Gen[Book] =
+    Gen.frequency(
+      1 -> availableBookGen(bookIdGen),
+      1 -> bookOnHoldGen(bookIdGen),
+      1 -> checkedOutBookGen(bookIdGen),
+    )
 
   val bookCheckedOutGen: Gen[BookCheckedOut] = for
     eventId <- eventIdGen
@@ -119,3 +123,19 @@ object LendingGenerators:
     libraryBranchId,
     bookId,
   )
+
+  def patronGen(patronIdGen: Gen[PatronId] = patronIdGen): Gen[Patron] = for
+    patronId <- patronIdGen
+    patronType <- Gen.oneOf(PatronType.values.toList)
+  yield Patron(patronId, patronType)
+
+  def patronHoldGen(bookIdGen: Gen[BookId]): Gen[Patron.Hold] = for
+    bookId <- bookIdGen
+    libraryBranchId <- libraryBranchIdGen
+    till <- instantArbitrary.arbitrary
+  yield Patron.Hold(bookId, libraryBranchId, till)
+
+  def patronOverdueCheckoutGen(bookIdGen: Gen[BookId]): Gen[Patron.OverdueCheckout] = for
+    bookId <- bookIdGen
+    libraryBranchId <- libraryBranchIdGen
+  yield Patron.OverdueCheckout(bookId, libraryBranchId)

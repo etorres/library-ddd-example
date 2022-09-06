@@ -32,7 +32,7 @@ final class UpdateBookStateSuite extends HttpServerSuite:
         )
         httpApp = {
           given UUIDGen[IO] = FakeUUIDGen(uuidGeneratorStateRef)
-          UpdateBookState(FakeEventPublisher(eventPublisherStateRef)).httpApp
+          UpdateBookState(FakeEventPublisher(eventPublisherStateRef), ???).httpApp
         }
         request = requestFrom(s"patron/${testCase.patronId}/holds", testCase.request)
         _ <- checkUsing(httpApp, request, Status.Created, testCase.eventId)

@@ -20,4 +20,5 @@ object Patron:
       patron: Patron,
       holds: List[Hold],
       overdueCheckouts: List[OverdueCheckout],
-  )
+  ):
+    def patronId: PatronId = patron.patronId

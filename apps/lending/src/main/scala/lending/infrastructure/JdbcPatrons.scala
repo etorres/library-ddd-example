@@ -30,17 +30,30 @@ final class JdbcPatrons(transactor: Transactor[IO])
     with PatronHoldsAndOverdueCheckoutsJdbcMapping:
   override def findBy(patronId: PatronId): IO[Option[PatronHoldsAndOverdueCheckouts]] = sql"""
         SELECT 
-          patrons.patron_id, 
-          patrons.patron_type, 
-          holds.book_id AS holds_book_id, 
-          holds.library_branch_id AS holds_library_branch_id, 
-          holds.till as holds_till,
-          overdue_checkouts.book_id AS overdue_checkouts_book_id, 
-          overdue_checkouts.library_branch_id AS overdue_checkouts_library_branch_id
-        FROM patrons, holds, overdue_checkouts 
-        WHERE 
-          patron_id = $patronId AND
-          (patrons.patron_id = holds.patron_id OR patrons.patron_id = overdue_checkouts.patron_id)"""
+          patrons.patron_id AS patron_id,
+          patrons.patron_type AS patron_type, 
+          book_id AS holds_book_id, 
+          library_branch_id AS holds_library_branch_id, 
+          till AS holds_till,
+          NULL AS overdue_checkouts_book_id,
+          NULL AS overdue_checkouts_library_branch_id
+        FROM patrons
+        JOIN holds ON holds.patron_id = patrons.patron_id
+        WHERE patrons.patron_id = $patronId
+  
+        UNION
+  
+        SELECT 
+          patrons.patron_id AS patron_id,
+          patrons.patron_type AS patron_type, 
+          NULL AS overdue_checkouts_book_id,
+          NULL AS overdue_checkouts_library_branch_id,
+          NULL AS holds_till,
+          book_id AS overdue_checkouts_book_id, 
+          library_branch_id AS overdue_checkouts_library_branch_id 
+        FROM patrons
+        JOIN overdue_checkouts ON overdue_checkouts.patron_id = patrons.patron_id
+        WHERE patrons.patron_id = $patronId"""
     .query[RawPatronHoldsAndOverdueCheckouts]
     .to[List]
     .transact(transactor)
