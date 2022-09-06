@@ -32,11 +32,24 @@ final class JdbcPatrons(transactor: Transactor[IO])
         SELECT 
           patrons.patron_id AS patron_id,
           patrons.patron_type AS patron_type, 
+          NULL::UUID AS holds_book_id,
+          NULL::UUID AS holds_library_branch_id,
+          NULL::TIMESTAMPTZ AS holds_till,
+          NULL::UUID AS overdue_checkouts_book_id,
+          NULL::UUID AS overdue_checkouts_library_branch_id
+        FROM patrons
+        WHERE patrons.patron_id = $patronId
+
+        UNION
+                                                                                
+        SELECT 
+          NULL::UUID AS patron_id,
+          NULL::VARCHAR AS patron_type, 
           book_id AS holds_book_id, 
           library_branch_id AS holds_library_branch_id, 
           till AS holds_till,
-          NULL AS overdue_checkouts_book_id,
-          NULL AS overdue_checkouts_library_branch_id
+          NULL::UUID AS overdue_checkouts_book_id,
+          NULL::UUID AS overdue_checkouts_library_branch_id
         FROM patrons
         JOIN holds ON holds.patron_id = patrons.patron_id
         WHERE patrons.patron_id = $patronId
@@ -44,11 +57,11 @@ final class JdbcPatrons(transactor: Transactor[IO])
         UNION
   
         SELECT 
-          patrons.patron_id AS patron_id,
-          patrons.patron_type AS patron_type, 
-          NULL AS overdue_checkouts_book_id,
-          NULL AS overdue_checkouts_library_branch_id,
-          NULL AS holds_till,
+          NULL::UUID AS patron_id,
+          NULL::VARCHAR AS patron_type, 
+          NULL::UUID AS holds_book_id,
+          NULL::UUID AS holds_library_branch_id,
+          NULL::TIMESTAMPTZ AS holds_till,
           book_id AS overdue_checkouts_book_id, 
           library_branch_id AS overdue_checkouts_library_branch_id 
         FROM patrons
@@ -75,8 +88,8 @@ object JdbcPatrons:
       with PatronTypeJdbcMapping
 
   final case class RawPatronHoldsAndOverdueCheckouts(
-      patronId: PatronId,
-      patronType: PatronType,
+      patronId: Option[PatronId],
+      patronType: Option[PatronType],
       holdBookId: Option[BookId],
       holdLibraryBranchId: Option[LibraryBranchId],
       holdTill: Option[Instant],
@@ -87,7 +100,7 @@ object JdbcPatrons:
   object RawPatronHoldsAndOverdueCheckouts:
     private[this] def parse(
         item: RawPatronHoldsAndOverdueCheckouts,
-    ): AllErrorsOr[Hold | OverdueCheckout] =
+    ): AllErrorsOr[Hold | OverdueCheckout | Patron] =
       val hold = for
         bookId <- item.holdBookId
         libraryBranchId <- item.holdLibraryBranchId
@@ -99,8 +112,14 @@ object JdbcPatrons:
         libraryBranchId <- item.overdueCheckoutLibraryBranchId
       yield OverdueCheckout(bookId, libraryBranchId)
 
-      List[Option[Hold | OverdueCheckout]](hold, overdueCheckout).collect { case Some(value) =>
-        value
+      val patron = for
+        patronId <- item.patronId
+        patronType <- item.patronType
+      yield Patron(patronId, patronType)
+
+      List[Option[Hold | OverdueCheckout | Patron]](hold, overdueCheckout, patron).collect {
+        case Some(value) =>
+          value
       } match
         case Nil =>
           InvalidDatabaseEntity(s"One or more required field(s) are missing: $item").invalidNec
@@ -112,17 +131,19 @@ object JdbcPatrons:
     ): AllErrorsOr[PatronHoldsAndOverdueCheckouts] =
       @tailrec
       def combineAll(
-          validateItems: List[AllErrorsOr[Hold | OverdueCheckout]],
-          accumulated: AllErrorsOr[List[Hold | OverdueCheckout]],
-      ): AllErrorsOr[List[Hold | OverdueCheckout]] = validateItems match
+          validateItems: List[AllErrorsOr[Hold | OverdueCheckout | Patron]],
+          accumulated: AllErrorsOr[List[Hold | OverdueCheckout | Patron]],
+      ): AllErrorsOr[List[Hold | OverdueCheckout | Patron]] = validateItems match
         case Nil => accumulated
         case ::(head, next) => combineAll(next, accumulated.combine(head.map(List(_))))
 
       val validatedItems = combineAll(items.toList.map(parse), List.empty.validNec)
 
-      val patron: AllErrorsOr[Patron] =
-        val item = items.head
-        Patron(item.patronId, item.patronType).validNec
+      val patron: AllErrorsOr[Patron] = validatedItems
+        .map(_.collectFirst { case value: Patron =>
+          value
+        })
+        .andThen(_.fold(InvalidDatabaseEntity("No patron found").invalidNec)(identity(_).validNec))
       val holds: AllErrorsOr[List[Hold]] = validatedItems.map(_.collect { case hold: Hold =>
         hold
       })

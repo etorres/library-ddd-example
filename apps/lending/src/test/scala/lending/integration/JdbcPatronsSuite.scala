@@ -10,7 +10,7 @@ import lending.infrastructure.LendingGenerators.{
   patronOverdueCheckoutGen,
 }
 import lending.infrastructure.{JdbcBooks, JdbcPatrons, JdbcPatronsWriter}
-import lending.integration.JdbcPatronsSuite.{testCaseGen, TestCase}
+import lending.integration.JdbcPatronsSuite.{sortedByBookId, testCaseGen, TestCase}
 import lending.model.Patron.{Hold, OverdueCheckout, PatronHoldsAndOverdueCheckouts}
 import lending.model.{Book, Patron, PatronId}
 import shared.infrastructure.CollectionGenerators.nDistinct
@@ -23,8 +23,6 @@ import org.scalacheck.effect.PropF.forAllF
 
 final class JdbcPatronsSuite extends JdbcTransactorsSuite:
   override def jdbcTestConfig: JdbcTestConfig = JdbcTestConfig.LendingPatrons
-
-  override def scalaCheckInitialSeed = "1HCIp1UcyrY_oJFzsG7uMITTJ2NRqLheO24dKy9cvLF=" // TODO
 
   test("should find holds and overdue checkouts by patron Id") {
     forAllF(testCaseGen) {
@@ -48,11 +46,8 @@ final class JdbcPatronsSuite extends JdbcTransactorsSuite:
           }
           _ <- patrons
             .findBy(patronId)
-            .map { result =>
-              println(s"\n\n >> ACTUAL: $result\n")
-              result
-            }
-            .assertEquals(patronHoldsAndOverdueCheckouts)
+            .map(_.map(sortedByBookId))
+            .assertEquals(patronHoldsAndOverdueCheckouts.map(sortedByBookId))
         yield ()
     }
   }
@@ -79,7 +74,7 @@ object JdbcPatronsSuite:
   private val testCaseGen: Gen[TestCase] = for
     selectedPatronId :: otherPatronId :: Nil <- nDistinct(2, patronIdGen)
     (selectedPatron, otherPatron) <- (patronGen(selectedPatronId), patronGen(otherPatronId)).tupled
-    bookIds <- nDistinct(12, bookIdGen)
+    bookIds <- Gen.frequency(1 -> List.empty, 9 -> nDistinct(12, bookIdGen))
     books <- bookIds.traverse(bookId => bookGen(bookId))
     (selectedBooks, otherBooks) = books.splitAt(4)
     (selectedHoldsAndOverdueCheckouts, otherHoldsAndOverdueCheckouts) <- (
@@ -92,3 +87,10 @@ object JdbcPatronsSuite:
     selectedBooks ++ otherBooks,
     List(selectedHoldsAndOverdueCheckouts, otherHoldsAndOverdueCheckouts),
   )
+
+  private val sortedByBookId: PatronHoldsAndOverdueCheckouts => PatronHoldsAndOverdueCheckouts =
+    x =>
+      x.copy(
+        holds = x.holds.sortBy(_.bookId.value),
+        overdueCheckouts = x.overdueCheckouts.sortBy(_.bookId.value),
+      )
