@@ -22,7 +22,10 @@ import doobie.postgres.implicits.*
 import java.time.Instant
 import java.util.UUID
 
-final class JdbcBooks(transactor: Transactor[IO]) extends Books with BookJdbcMapping:
+final class JdbcBooks(transactor: Transactor[IO])
+    extends AvailableBooks
+    with Books
+    with BookJdbcMapping:
   override def findBy(bookId: BookId): IO[Option[Book]] = sql"""
       SELECT
         book_id,
@@ -48,6 +51,14 @@ final class JdbcBooks(transactor: Transactor[IO]) extends Books with BookJdbcMap
         ).validated.map(Some.apply)
       case None => IO.pure(None)
     }
+
+  override def findAvailableBookBy(bookId: BookId): IO[Option[AvailableBook]] =
+    findBy(bookId).map(_.fold(None) { book =>
+      book match
+        case availableBook: AvailableBook => Some(availableBook)
+        case _: BookOnHold => None
+        case _: CheckedOutBook => None
+    })
 
   override def save(book: Book): IO[Unit] = for
     rawBook <- IO.pure(RawBook.from(book))

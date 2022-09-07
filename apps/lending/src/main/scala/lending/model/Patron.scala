@@ -21,4 +21,11 @@ object Patron:
       holds: List[Hold],
       overdueCheckouts: List[OverdueCheckout],
   ):
+    def numberOfHolds: Int = holds.size
+
+    def overdueCheckoutsAt(libraryBranchId: LibraryBranchId): Int =
+      overdueCheckouts.count(_.libraryBranchId == libraryBranchId)
+
     def patronId: PatronId = patron.patronId
+
+    def patronType: PatronType = patron.patronType

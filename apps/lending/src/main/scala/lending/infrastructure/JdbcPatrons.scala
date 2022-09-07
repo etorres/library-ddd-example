@@ -80,6 +80,8 @@ final class JdbcPatrons(transactor: Transactor[IO])
         case Nil => IO.pure(None)
     }
 
+  override def save(bookStateChanged: BookStateChanged): IO[Unit] = ???
+
 object JdbcPatrons:
   trait PatronHoldsAndOverdueCheckoutsJdbcMapping
       extends BookIdJdbcMapping

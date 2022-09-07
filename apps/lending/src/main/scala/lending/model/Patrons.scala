@@ -7,3 +7,5 @@ import cats.effect.IO
 
 trait Patrons:
   def findBy(patronId: PatronId): IO[Option[PatronHoldsAndOverdueCheckouts]]
+
+  def save(bookStateChanged: BookStateChanged): IO[Unit]

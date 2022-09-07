@@ -11,7 +11,7 @@ import io.circe.{Decoder, Encoder, HCursor}
 final case class PlaceHoldRequest(
     bookId: BookId,
     libraryBranchId: LibraryBranchId,
-    numberOfDays: Int,
+    numberOfDays: Option[Int],
 )
 
 object PlaceHoldRequest extends BookIdJsonCodec with LibraryBranchIdJsonCodec:
@@ -19,7 +19,7 @@ object PlaceHoldRequest extends BookIdJsonCodec with LibraryBranchIdJsonCodec:
     for
       bookId <- cursor.downField("bookId").as[BookId]
       libraryBranchId <- cursor.downField("libraryBranchId").as[LibraryBranchId]
-      numberOfDays <- cursor.downField("numberOfDays").as[Int]
+      numberOfDays <- cursor.downField("numberOfDays").as[Option[Int]]
     yield PlaceHoldRequest(bookId, libraryBranchId, numberOfDays)
 
   implicit val placeHoldRequestJsonEncoder: Encoder[PlaceHoldRequest] = deriveEncoder

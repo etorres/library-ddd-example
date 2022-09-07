@@ -7,21 +7,30 @@ import lending.application.UpdateBookState.{
   ApiRootPath,
   PatronIdVar,
 }
-import lending.model.{Books, BookStateChanged, PatronId, Patrons}
+import lending.model.*
+import lending.model.Book.AvailableBook
+import lending.model.BookStateChanged.BookPlacedOnHold
+import lending.model.HoldDurationType.HoldDuration
+import lending.model.Patron.PatronHoldsAndOverdueCheckouts
+import lending.model.PlacingOnHoldPolicy.PlacingOnHoldDecisionType.Allowance
 import shared.EventId
 import shared.RESTful.{apiPathPrefix, apiVersion}
 import shared.infrastructure.{EventIdJsonCodec, EventPublisher}
 
-import cats.effect.IO
+import cats.effect.{Clock, IO}
 import cats.effect.std.UUIDGen
+import cats.syntax.all.*
 import io.circe.syntax.*
 import org.http4s.circe.*
 import org.http4s.dsl.io.*
 import org.http4s.{EntityDecoder, HttpApp, HttpRoutes, Request}
 
-final class UpdateBookState(eventSender: EventPublisher[BookStateChanged], patrons: Patrons)(using
-    uuidGenerator: UUIDGen[IO],
-):
+final class UpdateBookState(
+    availableBooks: AvailableBooks,
+    bookStateChangedEventPublisher: EventPublisher[BookStateChanged],
+    patrons: Patrons,
+    placingOnHoldPolicies: PlacingOnHoldPolicies,
+)(using clock: Clock[IO], uuidGenerator: UUIDGen[IO]):
   val httpApp: HttpApp[IO] = HttpRoutes
     .of[IO] { case request @ POST -> ApiRootPath / "patron" / PatronIdVar(patronId) / "holds" =>
       placeHold(patronId, request)
@@ -30,9 +39,43 @@ final class UpdateBookState(eventSender: EventPublisher[BookStateChanged], patro
 
   private[this] def placeHold(patronId: PatronId, request: Request[IO]) = for
     placeHoldRequest <- request.as[PlaceHoldRequest]
-    patron <- patrons.findBy(patronId)
-    eventId <- uuidGenerator.randomUUID.map(EventId.from)
-    response <- Created(eventId.asJson.noSpaces)
+    availableBook <- availableBooks.findAvailableBookBy(placeHoldRequest.bookId)
+    patronHoldsAndOverdueCheckouts <- patrons.findBy(patronId)
+    response <- (availableBook, patronHoldsAndOverdueCheckouts).mapN((_, _)).fold(NotFound()) {
+      case (availableBook, patronHoldsAndOverdueCheckouts) =>
+        for
+          when <- clock.realTimeInstant
+          holdDuration = HoldDuration.from(when, placeHoldRequest.numberOfDays)
+          allCurrentPolicies <- placingOnHoldPolicies.allCurrentPolicies
+          rejections = allCurrentPolicies
+            .filter(
+              _.canHold(availableBook, patronHoldsAndOverdueCheckouts, holdDuration) != Allowance,
+            )
+          response <-
+            if rejections.isEmpty then
+              for
+                eventId <- uuidGenerator.randomUUID.map(EventId.from)
+                bookPlacedOnHold = BookPlacedOnHold(
+                  eventId,
+                  when,
+                  patronId,
+                  availableBook.bookId,
+                  availableBook.bookType,
+                  availableBook.libraryBranchId,
+                  holdDuration.from,
+                  holdDuration.to,
+                )
+                _ <- patrons.save(bookPlacedOnHold)
+                _ <- bookStateChangedEventPublisher.publish(bookPlacedOnHold)
+                // TODO: check and publish MaximumNumberOhHoldsReached
+                response <- Created(eventId.asJson.noSpaces)
+              yield response
+            else
+              BadRequest(
+                "",
+              ) // TODO: 1) publish BookHoldFailed; and 2) add rejections to bad request response
+        yield response
+    }
   yield response
 
 object UpdateBookState extends EventIdJsonCodec:

@@ -17,11 +17,11 @@ final class JdbcBooksSuite extends JdbcTransactorsSuite:
 
   test("should create and update a book in the lending database") {
     forAllF(testCaseGen) { case TestCase(book, updatedBook) =>
-      val availableBooks = JdbcBooks(transactorFixture())
+      val books = JdbcBooks(transactorFixture())
       for
-        _ <- availableBooks.save(book)
-        _ <- availableBooks.save(updatedBook)
-        _ <- availableBooks.findBy(book.bookId).assertEquals(Some(updatedBook))
+        _ <- books.save(book)
+        _ <- books.save(updatedBook)
+        _ <- books.findBy(book.bookId).assertEquals(Some(updatedBook))
       yield ()
     }
   }
